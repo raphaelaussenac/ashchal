@@ -1,2 +1,6 @@
 # ignore all .pyc files
 *.Rhistory
+*.DS_Store
+*.pdf
+ref
+data
