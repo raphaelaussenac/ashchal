@@ -92,6 +92,7 @@ bb1 <- rnorm(nbInd,bb1, bb1*-0.1)
 
 param <- data.frame(mdd, lambda, bt0, bt1, bb0, bb1)
 param$sumDiff <- NA
+param$iter <- NA
 
 # save parameters of all runs
 paramBackup <- data.frame("mdd" = NA, "lambda" = NA, "bt0" = NA, "bt1" = NA, "bb0" = NA, "bb1" = NA, "sumDiff" = NA)
@@ -103,7 +104,7 @@ paramBackup <- data.frame("mdd" = NA, "lambda" = NA, "bt0" = NA, "bt1" = NA, "bb
 
 start_time <- Sys.time()
 
-for (run in 1:2){  # Number of iterations
+for (iter in 1:2){  # Number of iterations
   for (nb in 1:nbInd){  # number of individuals
     # create an annual loop
     for (annee in 2008:2017){
@@ -178,6 +179,8 @@ for (run in 1:2){  # Number of iterations
   tabOptim$diff <- sqrt((tabOptim$annee - tabOptim$simulAnnee)^2)
   # sum of the differences
   param[nb, "sumDiff"]  <- sum(tabOptim$diff)
+  # indicate iteration
+  param[nb, "iter"]  <- iter
 
   # save parameters and performance
   paramBackup <- rbind(paramBackup, param[nb, ])
