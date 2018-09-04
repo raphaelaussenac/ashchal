@@ -95,7 +95,7 @@ param$sumDiff <- NA
 param$iter <- NA
 
 # save parameters of all runs
-paramBackup <- data.frame("mdd" = NA, "lambda" = NA, "bt0" = NA, "bt1" = NA, "bb0" = NA, "bb1" = NA, "sumDiff" = NA)
+paramBackup <- data.frame("mdd" = NA, "lambda" = NA, "bt0" = NA, "bt1" = NA, "bb0" = NA, "bb1" = NA, "sumDiff" = NA, "iter" = NA)
 
 ######################################################
 # RUN !!!!
