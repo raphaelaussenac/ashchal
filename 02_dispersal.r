@@ -5,100 +5,52 @@ rm(list=ls(all=TRUE))
 ######################################################
 
 library(ggplot2)
+library(ggmap)
 
-# ######################################################
-# # simulate a new world!
-# ######################################################
-#
-# # central coordinates of cells
-# X <- Y <- seq(0,300, 8)
-# world <- expand.grid(X = X, Y = Y)
-# row.names(world) <- seq(10001, nrow(world)+10000, 1)
-# world$pointID <- row.names(world)
-#
-# # assign random state to cells (1 = infected)
-# world$infected <- 0
-# world[world$X >= 150 & world$Y >= 250, "infected"] <- 1 # world[round(runif(1, 0, nrow(world)), digits = 0), "infected"] <- 1
-#
-# # assign temperature to cells (min temp of the hottest 6 hours of the year)
-# world$temperature <- (world$Y-300) / -10
-#
-# # assign Volume to cells
-# world$Volume <- world$X * world$Y / 1000
-#
-# # plot chalara
-# ggplot(data=world, aes(X, Y))+
-# geom_raster(aes(fill=infected), interpolate=F)+
-# scale_fill_gradientn(limits = c(0,1), colours=c("green4", "black"))
-#
-# # plot temperature
-# ggplot(data=world, aes(X, Y))+
-# geom_raster(aes(fill=temperature), interpolate=F)+
-# scale_fill_gradientn(limits = c(0,30), colours=c("blue","green","red"))
-#
-# # plot Volume
-# ggplot(data=world, aes(X, Y))+
-# geom_raster(aes(fill=Volume), interpolate=F)+
-# scale_fill_gradientn(limits = c(0,100), colours=c("lightgreen","green4","black"))
+######################################################
+# Map settings
+######################################################
 
+# Location
+lat <- c(42, 51.5)
+lon <- c(-5, 8.5)
+
+# Download background
+map <- get_map(location = c(lon = mean(lon), lat = mean(lat)), zoom = 5,
+               maptype = "toner-background", source = "google")
+
+# set background
+bckgrd <- ggmap(map)+
+  scale_x_continuous(limits = lon, expand = c(0, 0)) +
+  scale_y_continuous(limits = lat, expand = c(0, 0))
+
+# theme settings
+theme=theme(panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            strip.background = element_blank(),
+            panel.background = element_rect(fill = 'white'),
+            legend.position = c(0,0),
+            legend.justification=c(-0.05,-0.05),
+            text = element_text(size=12),
+            axis.text.x = element_text(size=10),
+            legend.key = element_blank())
 
 ######################################################
 # import volume data
 ######################################################
 
-load("~/Dropbox/chalarose/ashchal/volume.rdata")
-world <- vol[, c("Volume", "X", 'Y')]
-
-# remove empty cells
-world <- world[world$Volume != 0,]
+load("~/Dropbox/chalarose/ashchal/df.rdata")
+world <- df
 
 # remove Corsica Island
 world <- world[world$X < 8.5,]
 
-# plot volume
-ggplot()+
-  geom_point(data=world[world$Volume != 0, ], aes(X, Y, col=Volume), shape = 15, size = 3)+
-  scale_colour_gradient2(low = "lightgreen", mid = "green4", high = "black", midpoint = 200)+
-  coord_fixed()
-
-######################################################
-# import temperature data
-######################################################
-
-load("~/Dropbox/chalarose/ashchal/temp.rdata")
-
-# merge with world
-world <- merge(world[,c('Volume', "X")], temp, by = "X")
-
-# delete a duplicated point (due to same X coordinate)
-world <- world[world$X != 1.54067 & world$Y != 41.1919,]
-
-# plot temp
-ggplot()+
-  geom_point(data=world[world$MMTP_2007 >0,], aes(X, Y, col=MMTP_2007), shape = 15, size = 3, alpha = 0.8)+
-  scale_colour_gradient2(low = "blue", mid = "green", high = "red", midpoint = 20)+
-  coord_fixed()
-
-######################################################
-# import chalara data
-######################################################
-
-world$infected <- 0
-world[world$X > 7 & world$X < 7.5 & world$Y > 48 & world$Y < 48.5, "infected"] <- 1
-
-# plot volume
-ggplot()+
-  geom_point(data=world[world$Volume != 0, ], aes(X, Y, col=Volume), shape = 15, size = 3)+
-  scale_colour_gradient2(low = "lightgreen", mid = "green4", high = "black", midpoint = 200)+
-  geom_point(data=world[world$infected == 1, ], aes(X, Y), col = "red", shape = 16, size = 2)+
-  coord_fixed()
-
-######################################################
 # assign ID to each point
-######################################################
-
 row.names(world) <- seq(10001, nrow(world)+10000, 1)
 world$pointID <- row.names(world)
+
+# add the infection status
+world$infected <- 0
 
 ######################################################
 # distance matrix
@@ -126,10 +78,12 @@ bb0 <- 3
 bb1 <- -0.2
 
 # create an annual loop
-for (yr in 2008:2015){
+for (annee in 2008:2015){
   # list of infected cells
+  if (annee == 2008){
+    world[!is.na(world$annee) & world$annee == 2008, "infected"] <- 1
+  }
   infectCells <- rownames(world[world$infected == 1,])
-
   # for each infected cell, create the list of neighboring cells
   # within the maximum dispersal distance
   for (i in infectCells){
@@ -147,10 +101,10 @@ for (yr in 2008:2015){
       # assign each cell a probability of being contaminated using
       # the dispersal and temperature function:
       # first we must define the temperature we are going to use
-      # (previous year --> yr-1)
-      colnames(neighHealCells)[substr(colnames(neighHealCells), 6, 9) == (yr - 1)] <- "temperature"
+      # (previous year --> annee - 1)
+      colnames(neighHealCells)[substr(colnames(neighHealCells), 6, 9) == (annee - 1)] <- "temperature"
       # then we calculate the probability of being contaminated
-      # exp(-lambda*dist) * (1/(1+exp(bt0+bt1*temperature))) * (1/(1+exp(bb0+bb1*temperature)))
+      # exp(-lambda*dist) * (1/(1+exp(bt0+bt1*temperature))) * (1/(1+exp(bb0+bb1*volume)))
       neighHealCells$proba <- exp(-lambda*neighHealCells$dist) * (1/(1+exp(bb0+bb1*neighHealCells$Volume))) * (1/(1+exp(bt0+bt1*neighHealCells$temperature)))
       # draw a random value [0;1]
       neighHealCells$rdmvalue <- runif(nrow(neighHealCells), 0, 1)
@@ -164,18 +118,16 @@ for (yr in 2008:2015){
     }
   }
   # plot
-  print(ggplot()+
+  print(bckgrd+
+  theme_bw()+
+  theme+
   geom_point(data=world[world$Volume != 0, ], aes(X, Y, col=Volume), shape = 15, size = 3)+
   scale_colour_gradient2(low = "lightgreen", mid = "green4", high = "black", midpoint = 200)+
   geom_point(data=world[world$infected == 1, ], aes(X, Y), col = "red", shape = 16, size = 2)+
-  coord_fixed()+
-  ggtitle(yr))
-  print(yr)
+  # coord_fixed()+
+  ggtitle(annee))
+  print(annee)
 }
-
-
-
-
 
 #
 # ######################################################
