@@ -111,6 +111,9 @@ for (run in 1:2){  # Number of iterations
       if (annee == 2008){
         world[!is.na(world$annee) & world$annee == 2008, "infected"] <- 1
       }
+      if (annee == 2010){ # new contamination in the North
+        world[!is.na(world$annee) & world$annee == 2010 & world$Y > 49.5, "infected"] <- 1
+      }
       infectCells <- rownames(world[world$infected == 1,])
       # for each infected cell, create the list of neighboring cells
       # within the maximum dispersal distance
@@ -222,15 +225,16 @@ for (run in 1:2){  # Number of iterations
   param$sumDiff <- NA
 
 }
-
 end_time <- Sys.time()
-
 # time elapsed
 end_time - start_time
 
+# results
 paramBackup <- paramBackup[-1,]
 hist(paramBackup$sumDiff)
 
+
+save(paramBackup, file = '~/Dropbox/chalarose/ashchal/paramBackup.rdata')
 
 # ####################################################
 # ## Parallel
