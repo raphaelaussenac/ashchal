@@ -197,7 +197,7 @@ for (iter in 1:2){  # Number of iterations
   # crossover
   crossed <- param[5:7,]
   # create an empty table to recieve randomised values
-  cross <- as.data.frame(matrix(ncol = 7, nrow = 3))
+  cross <- as.data.frame(matrix(ncol = ncol(param), nrow = 3))
   colnames(cross) <- colnames(param)
   # for each parameter we randomly exchange values among individuals
   # first create a list of possible random values
