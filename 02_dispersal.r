@@ -91,11 +91,11 @@ bb0 <- rnorm(nbInd,bb0, bb0*0.1)
 bb1 <- rnorm(nbInd,bb1, bb1*-0.1)
 
 param <- data.frame(mdd, lambda, bt0, bt1, bb0, bb1)
-param$sumDiff <- NA
+param$pt <- NA
 param$iter <- NA
 
 # save parameters of all runs
-paramBackup <- data.frame("mdd" = NA, "lambda" = NA, "bt0" = NA, "bt1" = NA, "bb0" = NA, "bb1" = NA, "sumDiff" = NA, "iter" = NA)
+paramBackup <- data.frame("mdd" = NA, "lambda" = NA, "bt0" = NA, "bt1" = NA, "bb0" = NA, "bb1" = NA, "pt" = NA, "iter" = NA)
 
 ######################################################
 # RUN !!!!
@@ -168,17 +168,25 @@ for (iter in 1:2){  # Number of iterations
   # calculate the performance of the run
   ######################################################
 
-  # index to minimise: sum of the differences between
-  # DSF dates of infection and simulated dates
+  # index to maximise: score
+  # (minimising the sum of difference (obs - predicted dates)
+  # this encourages the model not to disseminate)
 
   # first we select all points with a DSF date of infection
   tabOptim <- world[!is.na(world$annee), c("ID", "annee", "simulAnnee")]
-  # then we delete those points for which there are no simulated infection dates
-  # (should be a tiny number of cells if the model runs on wide temporal window)
-  tabOptim <- tabOptim[!is.na(tabOptim$simulAnnee),]
-  tabOptim$diff <- sqrt((tabOptim$annee - tabOptim$simulAnnee)^2)
-  # sum of the differences
-  param[nb, "sumDiff"]  <- sum(tabOptim$diff)
+  # difference between observed and predicted dates
+  tabOptim$diff <- NA
+  tabOptim[!is.na(tabOptim$simulAnnee), "diff"]<- sqrt((tabOptim[!is.na(tabOptim$simulAnnee), "annee"] - tabOptim[!is.na(tabOptim$simulAnnee), "simulAnnee"])^2)
+  # assign score depending on the situation
+  tabOptim$pt <- NA
+  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 0, "pt"] <- 4
+  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 1, "pt"] <- 3
+  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 2, "pt"] <- 2
+  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 3, "pt"] <- 1
+  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff > 3, "pt"] <- 0
+  tabOptim[is.na(tabOptim$diff), "pt"] <- 0
+  # sum of the scores
+  param[nb, "pt"]  <- sum(tabOptim$pt)
   # indicate iteration
   param[nb, "iter"]  <- iter
 
@@ -191,7 +199,7 @@ for (iter in 1:2){  # Number of iterations
   ######################################################
 
   # selection
-  param <- param[order(param$sumDiff),]
+  param <- param[order(-param$pt),]
   selected <- param[1:4,]
 
   # crossover
@@ -225,7 +233,7 @@ for (iter in 1:2){  # Number of iterations
 
   # combine new set of parameters
   param <- rbind(selected, crossed, mutated)
-  param$sumDiff <- NA
+  param$pt <- NA
 
 }
 end_time <- Sys.time()
@@ -234,7 +242,7 @@ end_time - start_time
 
 # results
 paramBackup <- paramBackup[-1,]
-hist(paramBackup$sumDiff)
+paramBackup <- paramBackup[order(-paramBackup$pt),]
 
 
 save(paramBackup, file = '~/Dropbox/chalarose/ashchal/paramBackup.rdata')
@@ -260,7 +268,7 @@ save(paramBackup, file = '~/Dropbox/chalarose/ashchal/paramBackup.rdata')
 # #
 # out <- out[!is.na(out$mdd),]
 #
-# out1 <- out[order(out$sumDiff), ]
+# out1 <- out[order(out$pt), ]
 #
 # # save(out,file='./out.rdata')
 
