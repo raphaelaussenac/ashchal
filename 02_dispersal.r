@@ -6,7 +6,7 @@ rm(list=ls(all=TRUE))
 
 library(ggplot2)
 library(ggmap)
-library(doParallel)
+# library(doParallel)
 
 ######################################################
 # Map settings
@@ -83,12 +83,12 @@ bb1 <- -0.2
 
 # for X individuals
 nbInd <- 10
-mdd <- rnorm(nbInd,mdd, mdd*0.1)
-lambda <- rnorm(nbInd,lambda, lambda*0.1)
-bt0 <- rnorm(nbInd,bt0, bt0*-0.1)
-bt1 <- rnorm(nbInd,bt1, bt1*0.1)
-bb0 <- rnorm(nbInd,bb0, bb0*0.1)
-bb1 <- rnorm(nbInd,bb1, bb1*-0.1)
+mdd <- rnorm(nbInd,mdd, mdd * 0.9)
+lambda <- rnorm(nbInd,lambda, lambda * 0.9)
+bt0 <- rnorm(nbInd,bt0, bt0 * -0.9)
+bt1 <- rnorm(nbInd,bt1, bt1 * 0.9)
+bb0 <- rnorm(nbInd,bb0, bb0 * 0.9)
+bb1 <- rnorm(nbInd,bb1, bb1 * -0.9)
 
 param <- data.frame(mdd, lambda, bt0, bt1, bb0, bb1)
 param$pt <- NA
@@ -104,7 +104,7 @@ paramBackup <- data.frame("mdd" = NA, "lambda" = NA, "bt0" = NA, "bt1" = NA, "bb
 
 start_time <- Sys.time()
 
-for (iter in 1:2){  # Number of iterations
+for (iter in 1:1){  # Number of iterations
   for (nb in 1:nbInd){  # number of individuals
     # create an annual loop
     for (annee in 2008:2017){
@@ -179,11 +179,17 @@ for (iter in 1:2){  # Number of iterations
   tabOptim[!is.na(tabOptim$simulAnnee), "diff"]<- sqrt((tabOptim[!is.na(tabOptim$simulAnnee), "annee"] - tabOptim[!is.na(tabOptim$simulAnnee), "simulAnnee"])^2)
   # assign score depending on the situation
   tabOptim$pt <- NA
-  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 0, "pt"] <- 4
-  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 1, "pt"] <- 3
-  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 2, "pt"] <- 2
-  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 3, "pt"] <- 1
-  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff > 3, "pt"] <- 0
+  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 0, "pt"] <- 10
+  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 1, "pt"] <- 9
+  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 2, "pt"] <- 8
+  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 3, "pt"] <- 7
+  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 4, "pt"] <- 6
+  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 5, "pt"] <- 5
+  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 6, "pt"] <- 4
+  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 7, "pt"] <- 3
+  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 8, "pt"] <- 2
+  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 9, "pt"] <- 1
+  tabOptim[!is.na(tabOptim$diff) & tabOptim$diff > 9, "pt"] <- 0
   tabOptim[is.na(tabOptim$diff), "pt"] <- 0
   # sum of the scores
   param[nb, "pt"]  <- sum(tabOptim$pt)
@@ -192,6 +198,7 @@ for (iter in 1:2){  # Number of iterations
 
   # save parameters and performance
   paramBackup <- rbind(paramBackup, param[nb, ])
+  print(param)
   }
 
   ######################################################
