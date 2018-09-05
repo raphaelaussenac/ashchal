@@ -189,7 +189,10 @@ nb <- 1
   # indicate iteration
   param[nb, "iter"]  <- iter
 
+######################################################
 # Performance
+######################################################
+
 hist(tabOptim$diff)
 results <- as.data.frame(t(table(tabOptim$diff)))
 results <- results[, 2:3]
@@ -198,34 +201,50 @@ results$percent <- results$freq * 100 / nrow(tabOptim)
 results$cumulPercent <- cumsum(results$percent)
 results
 
+######################################################
 # Algorithme converges?
+######################################################
 load("~/Dropbox/chalarose/ashchal/paramBackup.rdata")
 vecMax <- c()
 for (i in sort(unique(paramBackup$iter))){
   a <- max(paramBackup[paramBackup$iter == i, 'pt'])
   vecMax <- c(vecMax, a)
 }
-plot(vecMax)
 
+vecQt <- c()
+for (i in sort(unique(paramBackup$iter))){
+  a <- quantile(paramBackup[paramBackup$iter == i, 'pt'], 0.7)
+  vecQt <- c(vecQt, a)
+}
 
-# ######################################################
-# # set the dispersal function
-# ######################################################
+vecMean <- c()
+for (i in sort(unique(paramBackup$iter))){
+  a <- mean(paramBackup[paramBackup$iter == i, 'pt'])
+  vecMean <- c(vecMean, a)
+}
+
+plot(vecMax, type = "l", col = "red", ylim = c(1500, 5800))
+lines(vecMean, type = "l", col = "orange")
+lines(vecQt, type = "l", col = "grey")
+
+######################################################
+# set the dispersal function
+######################################################
 # lambda <- 2.5
 curve(exp(-2.5*x), from = 0, to = 2, col = "grey")
 curve(exp(-lambda*x), from = 0, to = 2, col = "red", add = T)
-#
-# ######################################################
-# # set the temperature logistic function
-# ######################################################
+
+######################################################
+# set the temperature logistic function
+######################################################
 # bt0 <- -18
 # bt1 <- 0.8
 curve(1/(1+exp(-18+0.8*x)), from = 0, to = 40, col = "grey")
 curve(1/(1+exp(bt0+bt1*x)), from = 0, to = 40, col = "red", add = T)
-#
-# ######################################################
-# # set the volume exponential function
-# ######################################################
+
+######################################################
+# set the volume exponential function
+######################################################
 # bb0 <- 3
 # bb1 <- -0.2
 curve(1/(1+exp(3+-0.2*x)), from = 0, to = 100, col = "grey")

@@ -112,7 +112,7 @@ for (iter in 1:nbIter){  # Number of iterations
     # initial state for each individual (individual = model)
     worldInd <- world
     # create an annual loop
-    for (annee in 2008:2008){
+    for (annee in 2008:2017){
       # list of infected cells
       if (annee == 2008){
         worldInd[!is.na(worldInd$annee) & worldInd$annee == 2008, "infected"] <- 1
@@ -173,15 +173,11 @@ for (iter in 1:nbIter){  # Number of iterations
   ######################################################
 
   # index to maximise: score
-  # (minimising the sum of difference (obs - predicted dates)
-  # this encourages the model not to disseminate)
-
-  # first we select all points with a DSF date of infection
-  tabOptim <- worldInd[!is.na(worldInd$annee), c("ID", "annee", "simulAnnee")]
+  tabOptim <- worldInd[, c("ID", "annee", "simulAnnee")]
   # difference between observed and predicted dates
   tabOptim$diff <- NA
   tabOptim[!is.na(tabOptim$simulAnnee), "diff"]<- sqrt((tabOptim[!is.na(tabOptim$simulAnnee), "annee"] - tabOptim[!is.na(tabOptim$simulAnnee), "simulAnnee"])^2)
-  # assign score depending on the situation
+  # assign score depending on the lag between observed and predicted dates
   tabOptim$pt <- NA
   tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 0, "pt"] <- 10
   tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 1, "pt"] <- 9
@@ -194,7 +190,12 @@ for (iter in 1:nbIter){  # Number of iterations
   tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 8, "pt"] <- 2
   tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 9, "pt"] <- 1
   tabOptim[!is.na(tabOptim$diff) & tabOptim$diff > 9, "pt"] <- 0
-  tabOptim[is.na(tabOptim$diff), "pt"] <- 0
+  # model doesn't infect a cell that has no chalara on the field --> 0
+  tabOptim[is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- 0
+  # doesn't infect a cell that has chalara --> 0
+  tabOptim[!is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- 0
+  # infect a cell that has no chalara on the field --> -10
+  tabOptim[is.na(tabOptim$annee) & !is.na(tabOptim$simulAnnee), "pt"] <- -10
   # sum of the scores
   param[nb, "pt"]  <- sum(tabOptim$pt)
   # indicate iteration
