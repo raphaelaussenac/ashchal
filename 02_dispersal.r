@@ -12,29 +12,29 @@ library(ggmap)
 # Map settings
 ######################################################
 
-# Location
-lat <- c(42, 51.5)
-lon <- c(-5, 8.5)
-
-# Download background
-map <- get_map(location = c(lon = mean(lon), lat = mean(lat)), zoom = 5,
-               maptype = "toner-background", source = "google")
-
-# set background
-bckgrd <- ggmap(map)+
-  scale_x_continuous(limits = lon, expand = c(0, 0)) +
-  scale_y_continuous(limits = lat, expand = c(0, 0))
-
-# theme settings
-theme=theme(panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            strip.background = element_blank(),
-            panel.background = element_rect(fill = 'white'),
-            legend.position = c(0,0),
-            legend.justification=c(-0.05,-0.05),
-            text = element_text(size=12),
-            axis.text.x = element_text(size=10),
-            legend.key = element_blank())
+# # Location
+# lat <- c(42, 51.5)
+# lon <- c(-5, 8.5)
+#
+# # Download background
+# map <- get_map(location = c(lon = mean(lon), lat = mean(lat)), zoom = 5,
+#                maptype = "toner-background", source = "google")
+#
+# # set background
+# bckgrd <- ggmap(map)+
+#   scale_x_continuous(limits = lon, expand = c(0, 0)) +
+#   scale_y_continuous(limits = lat, expand = c(0, 0))
+#
+# # theme settings
+# theme=theme(panel.grid.major = element_blank(),
+#             panel.grid.minor = element_blank(),
+#             strip.background = element_blank(),
+#             panel.background = element_rect(fill = 'white'),
+#             legend.position = c(0,0),
+#             legend.justification=c(-0.05,-0.05),
+#             text = element_text(size=12),
+#             axis.text.x = element_text(size=10),
+#             legend.key = element_blank())
 
 ######################################################
 # import and prepare data
@@ -152,15 +152,15 @@ for (iter in 1:1){  # Number of iterations
           worldInd[worldInd$pointID %in% infectNeigh, "simulAnnee"] <- annee + 1
         }
       }
-      # plot
-      print(bckgrd+
-      theme_bw()+
-      theme+
-      geom_point(data=worldInd[worldInd$Volume != 0, ], aes(X, Y, col=Volume), shape = 15, size = 3)+
-      scale_colour_gradient2(low = "lightgreen", mid = "green4", high = "black", midpoint = 200)+
-      geom_point(data=worldInd[worldInd$infected == 1, ], aes(X, Y), col = "red", shape = 16, size = 2)+
-      # coord_fixed()+
-      ggtitle(annee))
+      # # plot
+      # print(bckgrd+
+      # theme_bw()+
+      # theme+
+      # geom_point(data=worldInd[worldInd$Volume != 0, ], aes(X, Y, col=Volume), shape = 15, size = 3)+
+      # scale_colour_gradient2(low = "lightgreen", mid = "green4", high = "black", midpoint = 200)+
+      # geom_point(data=worldInd[worldInd$infected == 1, ], aes(X, Y), col = "red", shape = 16, size = 2)+
+      # # coord_fixed()+
+      # ggtitle(annee))
       print(annee)
       print(nb)
     }
