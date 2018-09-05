@@ -12,29 +12,29 @@ library(ggmap)
 # Map settings
 ######################################################
 
-# # Location
-# lat <- c(42, 51.5)
-# lon <- c(-5, 8.5)
-#
-# # Download background
-# map <- get_map(location = c(lon = mean(lon), lat = mean(lat)), zoom = 5,
-#                maptype = "toner-background", source = "google")
-#
-# # set background
-# bckgrd <- ggmap(map)+
-#   scale_x_continuous(limits = lon, expand = c(0, 0)) +
-#   scale_y_continuous(limits = lat, expand = c(0, 0))
-#
-# # theme settings
-# theme=theme(panel.grid.major = element_blank(),
-#             panel.grid.minor = element_blank(),
-#             strip.background = element_blank(),
-#             panel.background = element_rect(fill = 'white'),
-#             legend.position = c(0,0),
-#             legend.justification=c(-0.05,-0.05),
-#             text = element_text(size=12),
-#             axis.text.x = element_text(size=10),
-#             legend.key = element_blank())
+# Location
+lat <- c(42, 51.5)
+lon <- c(-5, 8.5)
+
+# Download background
+map <- get_map(location = c(lon = mean(lon), lat = mean(lat)), zoom = 5,
+               maptype = "toner-background", source = "google")
+
+# set background
+bckgrd <- ggmap(map)+
+  scale_x_continuous(limits = lon, expand = c(0, 0)) +
+  scale_y_continuous(limits = lat, expand = c(0, 0))
+
+# theme settings
+theme=theme(panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            strip.background = element_blank(),
+            panel.background = element_rect(fill = 'white'),
+            legend.position = c(0,0),
+            legend.justification=c(-0.05,-0.05),
+            text = element_text(size=12),
+            axis.text.x = element_text(size=10),
+            legend.key = element_blank())
 
 ######################################################
 # import and prepare data
@@ -105,16 +105,18 @@ start_time <- Sys.time()
 
 for (iter in 1:1){  # Number of iterations
   for (nb in 1:nbInd){  # number of individuals
+    # initial state for each individual (individual = model)
+    worldInd <- world
     # create an annual loop
     for (annee in 2008:2017){
       # list of infected cells
       if (annee == 2008){
-        world[!is.na(world$annee) & world$annee == 2008, "infected"] <- 1
+        worldInd[!is.na(worldInd$annee) & worldInd$annee == 2008, "infected"] <- 1
       }
       if (annee == 2010){ # new contamination in the North
-        world[!is.na(world$annee) & world$annee == 2010 & world$Y > 49.5, "infected"] <- 1
+        worldInd[!is.na(worldInd$annee) & worldInd$annee == 2010 & worldInd$Y > 49.5, "infected"] <- 1
       }
-      infectCells <- rownames(world[world$infected == 1,])
+      infectCells <- rownames(worldInd[worldInd$infected == 1,])
       # for each infected cell, create the list of neighboring cells
       # within the maximum dispersal distance
       for (i in infectCells){
@@ -122,7 +124,7 @@ for (iter in 1:1){  # Number of iterations
         neighCells <- t(distMat[i,distMat[i,] < mdd])
         # remove those cells that are already infected
         # for that we first merge the infection and distance information
-        neighCells <- merge(world, neighCells, by = "row.names")
+        neighCells <- merge(worldInd, neighCells, by = "row.names")
         # then we keep only healthy cells
         # if there are some left
         if (length(neighCells[neighCells$infected == 0, 1])>0){
@@ -144,21 +146,21 @@ for (iter in 1:1){  # Number of iterations
           neighHealCells$test <- neighHealCells$proba - neighHealCells$rdmvalue
           # create a list of infected neighbors
           infectNeigh <- neighHealCells[neighHealCells$test > 0, "pointID"]
-          # update the infected state of cells in the "world" data frame
-          world[world$pointID %in% infectNeigh, "infected"] <- 1
+          # update the infected state of cells in the "worldInd" data frame
+          worldInd[worldInd$pointID %in% infectNeigh, "infected"] <- 1
           # assign the date of infection to newly infected cells
-          world[world$pointID %in% infectNeigh, "simulAnnee"] <- annee + 1
+          worldInd[worldInd$pointID %in% infectNeigh, "simulAnnee"] <- annee + 1
         }
       }
-      # # plot
-      # print(bckgrd+
-      # theme_bw()+
-      # theme+
-      # geom_point(data=world[world$Volume != 0, ], aes(X, Y, col=Volume), shape = 15, size = 3)+
-      # scale_colour_gradient2(low = "lightgreen", mid = "green4", high = "black", midpoint = 200)+
-      # geom_point(data=world[world$infected == 1, ], aes(X, Y), col = "red", shape = 16, size = 2)+
-      # # coord_fixed()+
-      # ggtitle(annee))
+      # plot
+      print(bckgrd+
+      theme_bw()+
+      theme+
+      geom_point(data=worldInd[worldInd$Volume != 0, ], aes(X, Y, col=Volume), shape = 15, size = 3)+
+      scale_colour_gradient2(low = "lightgreen", mid = "green4", high = "black", midpoint = 200)+
+      geom_point(data=worldInd[worldInd$infected == 1, ], aes(X, Y), col = "red", shape = 16, size = 2)+
+      # coord_fixed()+
+      ggtitle(annee))
       print(annee)
       print(nb)
     }
@@ -172,7 +174,7 @@ for (iter in 1:1){  # Number of iterations
   # this encourages the model not to disseminate)
 
   # first we select all points with a DSF date of infection
-  tabOptim <- world[!is.na(world$annee), c("ID", "annee", "simulAnnee")]
+  tabOptim <- worldInd[!is.na(worldInd$annee), c("ID", "annee", "simulAnnee")]
   # difference between observed and predicted dates
   tabOptim$diff <- NA
   tabOptim[!is.na(tabOptim$simulAnnee), "diff"]<- sqrt((tabOptim[!is.na(tabOptim$simulAnnee), "annee"] - tabOptim[!is.na(tabOptim$simulAnnee), "simulAnnee"])^2)
