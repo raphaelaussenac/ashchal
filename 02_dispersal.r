@@ -208,35 +208,31 @@ for (iter in 1:1){  # Number of iterations
 
   # selection
   param <- param[order(-param$pt),]
-  selected <- param[1:4,]
+  selected <- param[1:2,]
 
   # crossover
-  crossed <- param[5:7,]
+  crossed <- param[3:7,]
   # create an empty table to recieve randomised values
-  cross <- as.data.frame(matrix(ncol = ncol(param), nrow = 3))
+  cross <- as.data.frame(matrix(ncol = ncol(param), nrow = nrow(crossed)))
   colnames(cross) <- colnames(param)
   # for each parameter we randomly exchange values among individuals
   # first create a list of possible random values
-  rdm <- c(1, 2, 3)
+  rdm <- c(1:nrow(crossed))
   for (np in 1:ncol(crossed-1)){  # each column (parameter)
     for (ni in 1:nrow(cross)){  # each line (individual)
       draw <- round(runif(1, 1, length(rdm)), 0)  # random number in rdm
       cross[ni, np] <- crossed[rdm[draw], np]  # write the randmly selected value in the cross table
       rdm <- rdm[-draw]  # delete that value in the remaining choices
     }
-    rdm <- c(1, 2, 3)
+    rdm <- c(1:nrow(crossed))
   }
   crossed <- cross
 
   # mutation
   mutated <- param[8:10,]
-  # add random value to positive parameters
-  for (np in c("lambda", "bt1","bb0")){
-    mutated[, np] <- mutated[, np] + rnorm(3, 0, mutated[, np] * 0.3)
-  }
-  # add random value to negative parameters
-  for (np in c("bt0", "bb1")){
-    mutated[, np] <- mutated[, np] + rnorm(3, 0, mutated[, np] * -0.3)
+  # add random value to parameters
+  for (np in c("lambda", "bt1","bb0", "bt0", "bb1")){
+    mutated[, np] <- mutated[, np] + rnorm(3, 0, sqrt((mutated[, np] * 0.3)^2))
   }
 
   # combine new set of parameters
