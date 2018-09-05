@@ -6,35 +6,34 @@ rm(list=ls(all=TRUE))
 
 library(ggplot2)
 library(ggmap)
-# library(doParallel)
 
 ######################################################
 # Map settings
 ######################################################
 
-# # Location
-# lat <- c(42, 51.5)
-# lon <- c(-5, 8.5)
-#
-# # Download background
-# map <- get_map(location = c(lon = mean(lon), lat = mean(lat)), zoom = 5,
-#                maptype = "toner-background", source = "google")
-#
-# # set background
-# bckgrd <- ggmap(map)+
-#   scale_x_continuous(limits = lon, expand = c(0, 0)) +
-#   scale_y_continuous(limits = lat, expand = c(0, 0))
-#
-# # theme settings
-# theme=theme(panel.grid.major = element_blank(),
-#             panel.grid.minor = element_blank(),
-#             strip.background = element_blank(),
-#             panel.background = element_rect(fill = 'white'),
-#             legend.position = c(0,0),
-#             legend.justification=c(-0.05,-0.05),
-#             text = element_text(size=12),
-#             axis.text.x = element_text(size=10),
-#             legend.key = element_blank())
+# Location
+lat <- c(42, 51.5)
+lon <- c(-5, 8.5)
+
+# Download background
+map <- get_map(location = c(lon = mean(lon), lat = mean(lat)), zoom = 5,
+               maptype = "toner-background", source = "google")
+
+# set background
+bckgrd <- ggmap(map)+
+  scale_x_continuous(limits = lon, expand = c(0, 0)) +
+  scale_y_continuous(limits = lat, expand = c(0, 0))
+
+# theme settings
+theme=theme(panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            strip.background = element_blank(),
+            panel.background = element_rect(fill = 'white'),
+            legend.position = c(0,0),
+            legend.justification=c(-0.05,-0.05),
+            text = element_text(size=12),
+            axis.text.x = element_text(size=10),
+            legend.key = element_blank())
 
 ######################################################
 # import and prepare data
@@ -63,31 +62,25 @@ world$simulAnnee <- NA
 distMat <- as.data.frame(as.matrix(dist(x = world[,c("X", "Y")], method = "euclidean", diag = FALSE, upper = FALSE)))
 
 ######################################################
-# parameters' initialisation
+# parameters' initialisation from results
 ######################################################
+
+load("~/Dropbox/chalarose/ashchal/paramBackup.rdata")
 
 # set the maximum dispersal distance
 mdd <- 1
 
 # set the lambda parameter of the dispersal function
 # (to be optimised)
-lambda <- 2.5
+lambda <- paramBackup[1, "lambda"]
 
 # set the bt0 and bt1 parameters of the temperature function
-bt0 <- -18
-bt1 <- 0.8
+bt0 <- paramBackup[1, "bt0"]
+bt1 <- paramBackup[1, "bt1"]
 
 # set the bb0 and bb1 parameters of the Volume function
-bb0 <- 3
-bb1 <- -0.2
-
-# for X individuals
-nbInd <- 10
-lambda <- rnorm(nbInd,lambda, lambda * 0.9)
-bt0 <- rnorm(nbInd,bt0, bt0 * -0.9)
-bt1 <- rnorm(nbInd,bt1, bt1 * 0.9)
-bb0 <- rnorm(nbInd,bb0, bb0 * 0.9)
-bb1 <- rnorm(nbInd,bb1, bb1 * -0.9)
+bb0 <- paramBackup[1, "bb0"]
+bb1 <- paramBackup[1, "bb1"]
 
 param <- data.frame(mdd, lambda, bt0, bt1, bb0, bb1)
 param$pt <- NA
@@ -100,19 +93,14 @@ paramBackup <- data.frame("mdd" = NA, "lambda" = NA, "bt0" = NA, "bt1" = NA, "bb
 # RUN !!!!
 ######################################################
 
-# number of iteration
-nbIter <- 5
-
-# progress bar
-pb = txtProgressBar(min = 0, max = nbIter, initial = 0, style = 3)
-
-start_time <- Sys.time()
-for (iter in 1:nbIter){  # Number of iterations
-  for (nb in 1:nbInd){  # number of individuals
+iter <- 1
+nb <- 1
+# for (iter in 1:1){  # Number of iterations
+  # for (nb in 1:1){  # number of individuals
     # initial state for each individual (individual = model)
     worldInd <- world
     # create an annual loop
-    for (annee in 2008:2008){
+    for (annee in 2008:2017){
       # list of infected cells
       if (annee == 2008){
         worldInd[!is.na(worldInd$annee) & worldInd$annee == 2008, "infected"] <- 1
@@ -156,16 +144,17 @@ for (iter in 1:nbIter){  # Number of iterations
           worldInd[worldInd$pointID %in% infectNeigh, "simulAnnee"] <- annee + 1
         }
       }
-      # # plot
-      # print(bckgrd+
-      # theme_bw()+
-      # theme+
-      # geom_point(data=worldInd[worldInd$Volume != 0, ], aes(X, Y, col=Volume), shape = 15, size = 3)+
-      # scale_colour_gradient2(low = "lightgreen", mid = "green4", high = "black", midpoint = 200)+
-      # geom_point(data=worldInd[worldInd$infected == 1, ], aes(X, Y), col = "red", shape = 16, size = 2)+
-      # # coord_fixed()+
-      # ggtitle(annee))
-      print(paste("iter = ", iter, "/" , nbIter , " ; annee: ", annee, " ; individu: ", nb, "/" , nbInd , sep = ""))
+      # plot
+      print(bckgrd+
+      theme_bw()+
+      theme+
+      geom_point(data=worldInd[worldInd$Volume != 0, ], aes(X, Y, col=Volume), shape = 15, size = 3)+
+      scale_colour_gradient2(low = "lightgreen", mid = "green4", high = "black", midpoint = 200)+
+      geom_point(data=worldInd[worldInd$infected == 1, ], aes(X, Y), col = "red", shape = 16, size = 2)+
+      # coord_fixed()+
+      ggtitle(annee))
+      print(annee)
+      print(nb)
     }
 
   ######################################################
@@ -200,114 +189,44 @@ for (iter in 1:nbIter){  # Number of iterations
   # indicate iteration
   param[nb, "iter"]  <- iter
 
-  # save parameters and performance
-  paramBackup <- rbind(paramBackup, param[nb, ])
-  print(param)
-  }
+# Performance
+hist(tabOptim$diff)
+results <- as.data.frame(t(table(tabOptim$diff)))
+results <- results[, 2:3]
+colnames(results) <- c("lag", "freq")
+results$percent <- results$freq * 100 / nrow(tabOptim)
+results$cumulPercent <- cumsum(results$percent)
+results
 
-  ######################################################
-  # Genetic operators (selection, crossover, mutation)
-  ######################################################
-
-  # selection
-  param <- param[order(-param$pt),]
-  selected <- param[1:2,]
-
-  # crossover
-  crossed <- param[3:7,]
-  # create an empty table to recieve randomised values
-  cross <- as.data.frame(matrix(ncol = ncol(param), nrow = nrow(crossed)))
-  colnames(cross) <- colnames(param)
-  # for each parameter we randomly exchange values among individuals
-  # first create a list of possible random values
-  rdm <- c(1:nrow(crossed))
-  for (np in 1:ncol(crossed-1)){  # each column (parameter)
-    for (ni in 1:nrow(cross)){  # each line (individual)
-      draw <- round(runif(1, 1, length(rdm)), 0)  # random number in rdm
-      cross[ni, np] <- crossed[rdm[draw], np]  # write the randmly selected value in the cross table
-      rdm <- rdm[-draw]  # delete that value in the remaining choices
-    }
-    rdm <- c(1:nrow(crossed))
-  }
-  crossed <- cross
-
-  # mutation
-  mutated <- param[8:10,]
-  # add random value to parameters
-  for (np in c("lambda", "bt1","bb0", "bt0", "bb1")){
-    mutated[, np] <- mutated[, np] + rnorm(3, 0, sqrt((mutated[, np] * 0.3)^2))
-  }
-
-  # combine new set of parameters
-  param <- rbind(selected, crossed, mutated)
-  param$pt <- NA
-
-  # progress bar
-  # Sys.sleep(0.01)
-  setTxtProgressBar(pb,iter)
-  middle_time <- Sys.time()
-  print(middle_time - start_time)
-
+# Algorithme converges?
+load("~/Dropbox/chalarose/ashchal/paramBackup.rdata")
+vecMax <- c()
+for (i in sort(unique(paramBackup$iter))){
+  a <- max(paramBackup[paramBackup$iter == i, 'pt'])
+  vecMax <- c(vecMax, a)
 }
-end_time <- Sys.time()
-# time elapsed
-end_time - start_time
-
-# results
-paramBackup <- paramBackup[-1,]
-paramBackup <- paramBackup[order(-paramBackup$pt),]
+plot(vecMax)
 
 
-save(paramBackup, file = '~/Dropbox/chalarose/ashchal/paramBackup.rdata')
-
-# ####################################################
-# ## Parallel
-# ####################################################
-# # number of workers
-# registerDoParallel(cores = 2)
-# getDoParWorkers()
-#
-# start_time <- Sys.time()
-# out <- foreach(i = 1:nrow(param) ,.combine='rbind') %dopar% {
-#   individualScore()
-# }
-# end_time <- Sys.time()
-#
-# # time elapsed
-# end_time - start_time
-#
-#
-#
-# #
-# out <- out[!is.na(out$mdd),]
-#
-# out1 <- out[order(out$pt), ]
-#
-# # save(out,file='./out.rdata')
-
-
-
-
-
-
-
-#
 # ######################################################
 # # set the dispersal function
 # ######################################################
 # lambda <- 2.5
-# curve(exp(-lambda*x), from = 0, to = 2)
+curve(exp(-2.5*x), from = 0, to = 2, col = "grey")
+curve(exp(-lambda*x), from = 0, to = 2, col = "red", add = T)
 #
 # ######################################################
 # # set the temperature logistic function
 # ######################################################
 # bt0 <- -18
 # bt1 <- 0.8
-# curve(1/(1+exp(bt0+bt1*x)), from = 0, to = 40)
+curve(1/(1+exp(-18+0.8*x)), from = 0, to = 40, col = "grey")
+curve(1/(1+exp(bt0+bt1*x)), from = 0, to = 40, col = "red", add = T)
 #
 # ######################################################
 # # set the volume exponential function
 # ######################################################
 # bb0 <- 3
 # bb1 <- -0.2
-# curve(1/(1+exp(bb0+bb1*x)), from = 0, to = 100)
+curve(1/(1+exp(3+-0.2*x)), from = 0, to = 100, col = "grey")
+curve(1/(1+exp(bb0+bb1*x)), from = 0, to = 100, col = "red", add = T)
