@@ -71,15 +71,15 @@ mdd <- 1
 
 # set the lambda parameter of the dispersal function
 # (to be optimised)
-lambda <- 2.5
+lambda <- 9.6
 
 # set the bt0 and bt1 parameters of the temperature function
-bt0 <- -18
-bt1 <- 0.8
+bt0 <- -38
+bt1 <- 0.61
 
 # set the bb0 and bb1 parameters of the Volume function
-bb0 <- 3
-bb1 <- -0.2
+bb0 <- 0.67
+bb1 <- -0.5
 
 # for X individuals
 nbInd <- 10
