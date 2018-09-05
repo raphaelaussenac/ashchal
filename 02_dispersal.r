@@ -101,7 +101,7 @@ paramBackup <- data.frame("mdd" = NA, "lambda" = NA, "bt0" = NA, "bt1" = NA, "bb
 ######################################################
 
 # number of iteration
-nbIter <- 5
+nbIter <- 10
 
 # progress bar
 pb = txtProgressBar(min = 0, max = nbIter, initial = 0, style = 3)
@@ -160,9 +160,9 @@ for (iter in 1:nbIter){  # Number of iterations
       # print(bckgrd+
       # theme_bw()+
       # theme+
-      # geom_point(data=worldInd[worldInd$Volume != 0, ], aes(X, Y, col=Volume), shape = 15, size = 3)+
-      # scale_colour_gradient2(low = "lightgreen", mid = "green4", high = "black", midpoint = 200)+
-      # geom_point(data=worldInd[worldInd$infected == 1, ], aes(X, Y), col = "red", shape = 16, size = 2)+
+      # geom_point(data=worldInd, aes(X, Y, col=annee), shape = 15, size = 3)+
+      # scale_colour_gradient2(low = "orange", mid = "green", high = "blue", midpoint = 2012)+
+      # geom_point(data=worldInd[worldInd$infected == 1, ], aes(X, Y), col = "red", shape = 16, size = 1)+
       # # coord_fixed()+
       # ggtitle(annee))
       print(paste("iter = ", iter, "/" , nbIter , " ; annee: ", annee, " ; individu: ", nb, "/" , nbInd , sep = ""))
@@ -243,11 +243,38 @@ for (iter in 1:nbIter){  # Number of iterations
   param <- rbind(selected, crossed, mutated)
   param$pt <- NA
 
+  ######################################################
+  # Follow progression
+  ######################################################
+
   # progress bar
   # Sys.sleep(0.01)
   setTxtProgressBar(pb,iter)
   middle_time <- Sys.time()
   print(middle_time - start_time)
+
+  # Algorithme convergence plot
+  vecMax <- c()
+  for (i in sort(unique(paramBackup$iter))){
+    a <- max(paramBackup[paramBackup$iter == i, 'pt'], na.rm = T)
+    vecMax <- c(vecMax, a)
+  }
+
+  vecQt <- c()
+  for (i in sort(unique(paramBackup$iter))){
+    a <- quantile(paramBackup[paramBackup$iter == i, 'pt'], 0.7, na.rm = T)
+    vecQt <- c(vecQt, a)
+  }
+
+  vecMean <- c()
+  for (i in sort(unique(paramBackup$iter))){
+    a <- mean(paramBackup[paramBackup$iter == i, 'pt'], na.rm = T)
+    vecMean <- c(vecMean, a)
+  }
+
+  plot(vecMax, type = "l", col = "red", ylim = c(min(vecMean, vecMax, vecQt), max(vecMean, vecMax, vecQt)))
+  lines(vecMean, type = "l", col = "orange")
+  lines(vecQt, type = "l", col = "grey")
 
 }
 end_time <- Sys.time()

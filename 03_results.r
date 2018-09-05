@@ -148,13 +148,11 @@ nb <- 1
       print(bckgrd+
       theme_bw()+
       theme+
-      geom_point(data=worldInd[worldInd$Volume != 0, ], aes(X, Y, col=Volume), shape = 15, size = 3)+
-      scale_colour_gradient2(low = "lightgreen", mid = "green4", high = "black", midpoint = 200)+
-      geom_point(data=worldInd[worldInd$infected == 1, ], aes(X, Y), col = "red", shape = 16, size = 2)+
+      geom_point(data=worldInd, aes(X, Y, col=annee), shape = 15, size = 3)+
+      scale_colour_gradient2(low = "orange", mid = "green", high = "blue", midpoint = 2012)+
+      geom_point(data=worldInd[worldInd$infected == 1, ], aes(X, Y), col = "red", shape = 16, size = 1)+
       # coord_fixed()+
       ggtitle(annee))
-      print(annee)
-      print(nb)
     }
 
   ######################################################
@@ -202,7 +200,7 @@ results$cumulPercent <- cumsum(results$percent)
 results
 
 ######################################################
-# Algorithme converges?
+# # Algorithme convergence plot
 ######################################################
 load("~/Dropbox/chalarose/ashchal/paramBackup.rdata")
 vecMax <- c()
@@ -223,7 +221,7 @@ for (i in sort(unique(paramBackup$iter))){
   vecMean <- c(vecMean, a)
 }
 
-plot(vecMax, type = "l", col = "red", ylim = c(1500, 5800))
+plot(vecMax, type = "l", col = "red", ylim = c(min(vecMean, vecMax, vecQt), max(vecMean, vecMax, vecQt)))
 lines(vecMean, type = "l", col = "orange")
 lines(vecQt, type = "l", col = "grey")
 
