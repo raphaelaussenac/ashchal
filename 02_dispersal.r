@@ -103,7 +103,7 @@ paramBackup <- data.frame("mdd" = NA, "lambda" = NA, "bt0" = NA, "bt1" = NA, "bb
 
 start_time <- Sys.time()
 
-for (iter in 1:1){  # Number of iterations
+for (iter in 1:5){  # Number of iterations
   for (nb in 1:nbInd){  # number of individuals
     # initial state for each individual (individual = model)
     worldInd <- world
