@@ -67,7 +67,7 @@ distMat <- as.data.frame(as.matrix(dist(x = world[,c("X", "Y")], method = "eucli
 ######################################################
 
 # set the maximum dispersal distance
-mdd <- 2
+mdd <- 1
 
 # set the lambda parameter of the dispersal function
 # (to be optimised)
@@ -83,7 +83,6 @@ bb1 <- -0.2
 
 # for X individuals
 nbInd <- 10
-mdd <- rnorm(nbInd,mdd, mdd * 0.9)
 lambda <- rnorm(nbInd,lambda, lambda * 0.9)
 bt0 <- rnorm(nbInd,bt0, bt0 * -0.9)
 bt1 <- rnorm(nbInd,bt1, bt1 * 0.9)
@@ -120,7 +119,7 @@ for (iter in 1:1){  # Number of iterations
       # within the maximum dispersal distance
       for (i in infectCells){
         # create the list of neighboring cells
-        neighCells <- t(distMat[i,distMat[i,] < param[nb, "mdd"]])
+        neighCells <- t(distMat[i,distMat[i,] < mdd])
         # remove those cells that are already infected
         # for that we first merge the infection and distance information
         neighCells <- merge(world, neighCells, by = "row.names")
@@ -230,7 +229,7 @@ for (iter in 1:1){  # Number of iterations
   # mutation
   mutated <- param[8:10,]
   # add random value to positive parameters
-  for (np in c("mdd", "lambda", "bt1","bb0")){
+  for (np in c("lambda", "bt1","bb0")){
     mutated[, np] <- mutated[, np] + rnorm(3, 0, mutated[, np] * 0.3)
   }
   # add random value to negative parameters
