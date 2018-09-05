@@ -71,15 +71,15 @@ mdd <- 1
 
 # set the lambda parameter of the dispersal function
 # (to be optimised)
-lambda <- 9.6
+lambda <- 2.5
 
 # set the bt0 and bt1 parameters of the temperature function
-bt0 <- -38
-bt1 <- 0.61
+bt0 <- -18
+bt1 <- 0.8
 
 # set the bb0 and bb1 parameters of the Volume function
-bb0 <- 0.67
-bb1 <- -0.5
+bb0 <- 3
+bb1 <- -0.2
 
 # for X individuals
 nbInd <- 10
@@ -236,7 +236,7 @@ for (iter in 1:nbIter){  # Number of iterations
   mutated <- param[8:10,]
   # add random value to parameters
   for (np in c("lambda", "bt1","bb0", "bt0", "bb1")){
-    mutated[, np] <- mutated[, np] + rnorm(3, 0, sqrt((mutated[, np] * 0.3)^2))
+    mutated[, np] <- mutated[, np] + rnorm(3, 0, sqrt((mutated[, np] * 0.9)^2))
   }
 
   # combine new set of parameters
@@ -266,14 +266,14 @@ for (iter in 1:nbIter){  # Number of iterations
     vecQt <- c(vecQt, a)
   }
 
-  vecMean <- c()
+  vecMed <- c()
   for (i in sort(unique(paramBackup$iter))){
-    a <- mean(paramBackup[paramBackup$iter == i, 'pt'], na.rm = T)
-    vecMean <- c(vecMean, a)
+    a <- quantile(paramBackup[paramBackup$iter == i, 'pt'], 0.5, na.rm = T)
+    vecMed <- c(vecMed, a)
   }
 
-  plot(vecMax, type = "l", col = "red", ylim = c(min(vecMean, vecMax, vecQt), max(vecMean, vecMax, vecQt)))
-  lines(vecMean, type = "l", col = "orange")
+  plot(vecMax, type = "l", col = "red", ylim = c(min(vecMed, vecMax, vecQt), max(vecMed, vecMax, vecQt)))
+  lines(vecMed, type = "l", col = "orange")
   lines(vecQt, type = "l", col = "grey")
 
 }

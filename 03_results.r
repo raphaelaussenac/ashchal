@@ -215,14 +215,14 @@ for (i in sort(unique(paramBackup$iter))){
   vecQt <- c(vecQt, a)
 }
 
-vecMean <- c()
+vecMed <- c()
 for (i in sort(unique(paramBackup$iter))){
-  a <- mean(paramBackup[paramBackup$iter == i, 'pt'])
-  vecMean <- c(vecMean, a)
+  a <- a <- quantile(paramBackup[paramBackup$iter == i, 'pt'], 0.5)
+  vecMed <- c(vecMed, a)
 }
 
-plot(vecMax, type = "l", col = "red", ylim = c(min(vecMean, vecMax, vecQt), max(vecMean, vecMax, vecQt)))
-lines(vecMean, type = "l", col = "orange")
+plot(vecMax, type = "l", col = "red", ylim = c(min(vecMed, vecMax, vecQt), max(vecMed, vecMax, vecQt)))
+lines(vecMed, type = "l", col = "orange")
 lines(vecQt, type = "l", col = "grey")
 
 ######################################################
