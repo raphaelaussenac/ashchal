@@ -101,7 +101,7 @@ paramBackup <- data.frame("mdd" = NA, "lambda" = NA, "bt0" = NA, "bt1" = NA, "bb
 ######################################################
 
 # number of iteration
-nbIter <- 10
+nbIter <- 5
 
 # progress bar
 pb = txtProgressBar(min = 0, max = nbIter, initial = 0, style = 3)
@@ -214,7 +214,12 @@ for (iter in 1:nbIter){  # Number of iterations
   # First define the probability (for each ind) of being
   # part of the reproducing population (proba is
   # is proportional to score)
-  param$proba <- param$pt / max(param$pt)
+  if (min(param$pt) < 0){
+    param$proba <- (param$pt + sqrt(min(param$pt)^2)) / (max(param$pt) + sqrt(min(param$pt)^2))
+  } else {
+    param$proba <- param$pt / max(param$pt)
+  }
+
   selected <- data.frame()
   # till we have nbInd individuals
   while (nrow(selected) < nbInd){
