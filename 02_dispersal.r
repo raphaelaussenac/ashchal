@@ -191,7 +191,7 @@ for (iter in 1:nbIter){  # Number of iterations
   tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 9, "pt"] <- 1
   tabOptim[!is.na(tabOptim$diff) & tabOptim$diff > 9, "pt"] <- 0
   # model doesn't infect a cell that has no chalara on the field --> 0
-  tabOptim[is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- 0
+  tabOptim[is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- 10
   # doesn't infect a cell that has chalara --> 0
   tabOptim[!is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- -10
   # infect a cell that has no chalara on the field --> -10
