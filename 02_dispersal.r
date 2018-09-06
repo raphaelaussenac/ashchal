@@ -193,7 +193,7 @@ for (iter in 1:nbIter){  # Number of iterations
   # model doesn't infect a cell that has no chalara on the field --> 0
   tabOptim[is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- 0
   # doesn't infect a cell that has chalara --> 0
-  tabOptim[!is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- 0
+  tabOptim[!is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- -10
   # infect a cell that has no chalara on the field --> -10
   tabOptim[is.na(tabOptim$annee) & !is.na(tabOptim$simulAnnee), "pt"] <- -10
   # sum of the scores
