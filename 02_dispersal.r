@@ -112,7 +112,7 @@ for (iter in 1:nbIter){  # Number of iterations
     # initial state for each individual (individual = model)
     worldInd <- world
     # create an annual loop
-    for (annee in 2008:2017){
+    for (annee in 2008:2008){
       # list of infected cells
       if (annee == 2008){
         worldInd[!is.na(worldInd$annee) & worldInd$annee == 2008, "infected"] <- 1
@@ -211,37 +211,114 @@ for (iter in 1:nbIter){  # Number of iterations
   ######################################################
 
   # selection
-  param <- param[order(-param$pt),]
-  selected <- param[1:2,]
+  # First define the probability (for each ind) of being
+  # part of the reproducing population (proba is
+  # is proportional to score)
+  param$proba <- param$pt / max(param$pt)
+  selected <- data.frame()
+  # till we have nbInd individuals
+  while (nrow(selected) < nbInd){
+    # Then drawing with replacement
+    # for that we first assign random numbers [0; 1]
+    # to each individual
+    param$rdmnb <- runif(nrow(param), 0, 1)
+    # If the proba > rdmnb, the individual is selected
+    # for reproduction
+    param$select <- param$proba - param$rdmnb
+    selected <- rbind(selected, param[param$select > 0, ])
+  }
+  selected <- selected[1:nbInd,1:8]
 
   # crossover
-  crossed <- param[3:7,]
-  # create an empty table to recieve randomised values
-  cross <- as.data.frame(matrix(ncol = ncol(param), nrow = nrow(crossed)))
-  colnames(cross) <- colnames(param)
-  # for each parameter we randomly exchange values among individuals
-  # first create a list of possible random values
-  rdm <- c(1:nrow(crossed))
-  for (np in 1:ncol(crossed-1)){  # each column (parameter)
-    for (ni in 1:nrow(cross)){  # each line (individual)
-      draw <- round(runif(1, 1, length(rdm)), 0)  # random number in rdm
-      cross[ni, np] <- crossed[rdm[draw], np]  # write the randmly selected value in the cross table
-      rdm <- rdm[-draw]  # delete that value in the remaining choices
+  # crossover probability = 0.8 (applies to allels)
+  # divide the reproducing population into 2 sets of individuals
+  male <- selected[1:(nbInd/2), c("lambda", "bt0","bt1", "bb0", "bb1")]
+  female <- selected[((nbInd/2)+1):nbInd, c("lambda", "bt0","bt1", "bb0", "bb1")]
+
+  crossed <- data.frame()
+  for (i in 1:nrow(male)){  # for each couple
+    # create couples
+    couple <- rbind(male[i,], female[i,])
+    couple <- as.data.frame(t(couple))
+    # assign random number [0, 1] to each parameter
+    rdmnb <- runif(5, 0, 1)
+    couple <- cbind(couple, rdmnb)
+    couple$crossProba <- 0.8
+    couple$diff <- couple$crossProba - couple$rdmnb
+    for (j in 1:nrow(couple)){  # for each allel
+      # crossover if rdmnb < crossProba
+      if (couple[j, "diff"] > 0){
+        a <- couple[j, 1]
+        couple[j, 1] <- couple[j, 2]
+        couple[j, 2] <- a
+      }
     }
-    rdm <- c(1:nrow(crossed))
+    couple <- as.data.frame(t(couple))
+    couple <- couple[1:2,]
+    crossed <- rbind(crossed, couple)
   }
-  crossed <- cross
 
   # mutation
-  mutated <- param[8:10,]
-  # add random value to parameters
-  for (np in c("lambda", "bt1","bb0", "bt0", "bb1")){
-    mutated[, np] <- mutated[, np] + rnorm(3, 0, sqrt((mutated[, np] * 0.9)^2))
+  # mutation probability = 0.1 (applies to allels)
+  for (i in 1:ncol(crossed)){
+    for (j in 1:nrow(crossed)){
+      rdmnb <- runif(1, 0, 1)
+      if (rdmnb < 0.1){
+        crossed[j, i] <- crossed[j, i] + rnorm(1, 0, sqrt((crossed[j, i] * 0.9)^2))
+      }
+    }
   }
+  mutated <- crossed
 
-  # combine new set of parameters
-  param <- rbind(selected, crossed, mutated)
-  param$pt <- NA
+  # elitist strategy suspended becaus best fitted most often already selected
+  #
+  # # elitist strategy
+  # # repace one of the new individuals by the best individual of
+  # # the previous generation
+  # rdmnb <- round(runif(1, 1, ncol(mutated)), 0)
+  # elitInd <- param[param$pt == max(param$pt), c("lambda", "bt0","bt1", "bb0", "bb1")]
+  # mutated[rdmnb, ] <- elitInd
+
+  # format new parameters
+  mutated$pt <- NA
+  mutated$iter <- NA
+  a <- runif(nrow(mutated), mdd, mdd)
+  mutated <- cbind(a, mutated)
+  colnames(mutated)[1] <- "mdd"
+  param <- mutated
+
+  # # selection
+  # param <- param[order(-param$pt),]
+  # selected <- param[1:2,]
+  #
+  # # crossover
+  # crossed <- param[3:7,]
+  # # create an empty table to recieve randomised values
+  # cross <- as.data.frame(matrix(ncol = ncol(param), nrow = nrow(crossed)))
+  # colnames(cross) <- colnames(param)
+  # # for each parameter we randomly exchange values among individuals
+  # # first create a list of possible random values
+  # rdm <- c(1:nrow(crossed))
+  # for (np in 1:ncol(crossed-1)){  # each column (parameter)
+  #   for (ni in 1:nrow(cross)){  # each line (individual)
+  #     draw <- round(runif(1, 1, length(rdm)), 0)  # random number in rdm
+  #     cross[ni, np] <- crossed[rdm[draw], np]  # write the randmly selected value in the cross table
+  #     rdm <- rdm[-draw]  # delete that value in the remaining choices
+  #   }
+  #   rdm <- c(1:nrow(crossed))
+  # }
+  # crossed <- cross
+  #
+  # # mutation
+  # mutated <- param[8:10,]
+  # # add random value to parameters
+  # for (np in c("lambda", "bt1","bb0", "bt0", "bb1")){
+  #   mutated[, np] <- mutated[, np] + rnorm(3, 0, sqrt((mutated[, np] * 0.9)^2))
+  # }
+  #
+  # # combine new set of parameters
+  # param <- rbind(selected, crossed, mutated)
+  # param$pt <- NA
 
   ######################################################
   # Follow progression
@@ -256,19 +333,19 @@ for (iter in 1:nbIter){  # Number of iterations
   # Algorithme convergence plot
   vecMax <- c()
   for (i in sort(unique(paramBackup$iter))){
-    a <- max(paramBackup[paramBackup$iter == i, 'pt'], na.rm = T)
+    a <- max(paramBackup[paramBackup$iter %in% c(1:i), 'pt'], na.rm = T)
     vecMax <- c(vecMax, a)
   }
 
   vecQt <- c()
   for (i in sort(unique(paramBackup$iter))){
-    a <- quantile(paramBackup[paramBackup$iter == i, 'pt'], 0.7, na.rm = T)
+    a <- quantile(paramBackup[paramBackup$iter %in% c(1:i), 'pt'], 0.7, na.rm = T)
     vecQt <- c(vecQt, a)
   }
 
   vecMed <- c()
   for (i in sort(unique(paramBackup$iter))){
-    a <- quantile(paramBackup[paramBackup$iter == i, 'pt'], 0.5, na.rm = T)
+    a <- quantile(paramBackup[paramBackup$iter %in% c(1:i), 'pt'], 0.5, na.rm = T)
     vecMed <- c(vecMed, a)
   }
 

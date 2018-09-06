@@ -205,19 +205,19 @@ results
 load("~/Dropbox/chalarose/ashchal/paramBackup.rdata")
 vecMax <- c()
 for (i in sort(unique(paramBackup$iter))){
-  a <- max(paramBackup[paramBackup$iter == i, 'pt'])
+  a <- max(paramBackup[paramBackup$iter %in% c(1:i), 'pt'])
   vecMax <- c(vecMax, a)
 }
 
 vecQt <- c()
 for (i in sort(unique(paramBackup$iter))){
-  a <- quantile(paramBackup[paramBackup$iter == i, 'pt'], 0.7)
+  a <- quantile(paramBackup[paramBackup$iter %in% c(1:i), 'pt'], 0.7)
   vecQt <- c(vecQt, a)
 }
 
 vecMed <- c()
 for (i in sort(unique(paramBackup$iter))){
-  a <- a <- quantile(paramBackup[paramBackup$iter == i, 'pt'], 0.5)
+  a <- a <- quantile(paramBackup[paramBackup$iter %in% c(1:i), 'pt'], 0.5)
   vecMed <- c(vecMed, a)
 }
 
