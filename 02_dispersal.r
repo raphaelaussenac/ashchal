@@ -83,11 +83,12 @@ bb1 <- -0.2
 
 # for X individuals
 nbInd <- 10
-lambda <- runif(nbInd, 0, 15)
-bt0 <- -runif(nbInd, 0, 30)
-bt1 <- runif(nbInd, 0, 2)
-bb0 <- runif(nbInd, 0, 15)
-bb1 <- -runif(nbInd, 0, 1)
+# (the first number is from a previous GA)
+lambda <- c(0.54, runif(nbInd - 1, 0, 15))
+bt0 <- c(-25.06, -runif(nbInd - 1, 0, 30))
+bt1 <- c(1.07, runif(nbInd - 1, 0, 2))
+bb0 <- c(2.11, runif(nbInd - 1, 0, 15))
+bb1 <- c(-0.08, -runif(nbInd - 1, 0, 1))
 
 param <- data.frame(mdd, lambda, bt0, bt1, bb0, bb1)
 param$pt <- NA

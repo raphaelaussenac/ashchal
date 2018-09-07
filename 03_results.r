@@ -6,6 +6,8 @@ rm(list=ls(all=TRUE))
 
 library(ggplot2)
 library(ggmap)
+library(reshape2)
+library(gridExtra)
 
 ######################################################
 # Map settings
@@ -32,7 +34,10 @@ theme=theme(panel.grid.major = element_blank(),
             legend.position = c(0,0),
             legend.justification=c(-0.05,-0.05),
             text = element_text(size=12),
-            axis.text.x = element_text(size=10),
+            axis.text.x = element_text(size=12),
+            axis.text.y = element_text(size=12),
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank(),
             legend.key = element_blank())
 
 ######################################################
@@ -146,7 +151,7 @@ nb <- 1
       }
       # plot
       print(bckgrd+
-      theme_bw()+
+      # theme_bw()+
       theme+
       geom_point(data=worldInd, aes(X, Y, col=annee), shape = 15, size = 3)+
       scale_colour_gradient2(low = "orange", mid = "green", high = "blue", midpoint = 2012)+
@@ -188,20 +193,31 @@ nb <- 1
   param[nb, "iter"]  <- iter
 
 ######################################################
-# Performance
+# Plot results
 ######################################################
 
-hist(tabOptim$diff)
+# last map
+map <- bckgrd+
+theme_bw()+
+theme+
+geom_point(data=worldInd[!is.na(worldInd$annee),],aes(X,Y, col=annee), shape = 15, size = 3)+
+scale_colour_gradient2(low = "orange", mid = "green", high = "blue", midpoint = 2012)+
+geom_point(data=worldInd[worldInd$infected == 1, ], aes(X, Y), col = "red", shape = 16, size = 1)+
+ggtitle(annee)
+
+# observed - predicted lag
 results <- as.data.frame(t(table(tabOptim$diff)))
 results <- results[, 2:3]
 colnames(results) <- c("lag", "freq")
 results$percent <- results$freq * 100 / nrow(tabOptim)
 results$cumulPercent <- cumsum(results$percent)
-results
 
-######################################################
-# # Algorithme convergence plot
-######################################################
+lag <- ggplot(data = results, aes(x = lag, y = freq))+
+geom_bar(stat="identity")+
+geom_text(aes(label = paste(round(cumulPercent, 2), "%")), col = "red", vjust=-0.25)+
+theme_bw()
+
+# Convergence plot
 load("~/Dropbox/chalarose/ashchal/paramBackup.rdata")
 vecMax <- c()
 for (i in sort(unique(paramBackup$iter))){
@@ -221,29 +237,58 @@ for (i in sort(unique(paramBackup$iter))){
   vecMed <- c(vecMed, a)
 }
 
-plot(vecMax, type = "l", col = "red", ylim = c(min(vecMed, vecMax, vecQt), max(vecMed, vecMax, vecQt)))
-lines(vecMed, type = "l", col = "orange")
-lines(vecQt, type = "l", col = "grey")
+vec <- data.frame()
+vec <- as.data.frame(t(rbind(vec, vecMax)))
+vec <- cbind(vec, vecMed, vecQt)
+vec$iter <- c(1:nrow(vec))
+colnames(vec) <- c("max", "0.7qt", "0.5qt", "iter")
+vec <- melt(vec, id.vars = c("iter"))
 
-######################################################
+converg <- ggplot(data = vec, aes(iter, value, group = variable))+
+geom_line(aes(col = variable))+
+theme_bw()+
+ylab("score")+
+xlab("iteration")+
+theme(legend.position="bottom", legend.title=element_blank(), legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(-10,-10,-10,-10))
+
+# Trace plot
+longparam <- melt(paramBackup, id.vars = c("mdd", "pt", "iter"))
+trace <- ggplot(data = longparam, aes(iter, value))+
+xlab("iteration")+
+geom_point(shape = 16, size = 1)+
+geom_smooth(col = "orange")+
+facet_wrap(~ variable, ncol = 1, scales = "free", strip.position = "right")+
+theme(axis.title.y = element_blank(), strip.background = element_rect(colour = "white", fill = "white"), legend.title=element_blank(), legend.position = "bottom", panel.spacing = unit(0, "lines"))
+
 # set the dispersal function
-######################################################
 # lambda <- 2.5
-curve(exp(-2.5*x), from = 0, to = 2, col = "grey")
-curve(exp(-lambda*x), from = 0, to = 2, col = "red", add = T)
+disp <- ggplot(data.frame(x=c(0, 2)), aes(x)) +
+stat_function(fun=function(x) exp(-2.5*x), col = "grey")+
+stat_function(fun=function(x) exp(-lambda*x), col = "orange")+
+ggtitle("dispersal")+
+theme(axis.title = element_blank())
 
-######################################################
 # set the temperature logistic function
-######################################################
 # bt0 <- -18
 # bt1 <- 0.8
-curve(1/(1+exp(-18+0.8*x)), from = 0, to = 40, col = "grey")
-curve(1/(1+exp(bt0+bt1*x)), from = 0, to = 40, col = "red", add = T)
+tempC <- ggplot(data.frame(x=c(0, 40)), aes(x)) +
+stat_function(fun=function(x) 1/(1+exp(-18+0.8*x)), col = "grey")+
+stat_function(fun=function(x) 1/(1+exp(bt0+bt1*x)), col = "orange")+
+ggtitle("temperature")+
+theme(axis.title = element_blank())
 
-######################################################
 # set the volume exponential function
-######################################################
 # bb0 <- 3
 # bb1 <- -0.2
-curve(1/(1+exp(3+-0.2*x)), from = 0, to = 100, col = "grey")
-curve(1/(1+exp(bb0+bb1*x)), from = 0, to = 100, col = "red", add = T)
+vol <- ggplot(data.frame(x=c(0, 100)), aes(x)) +
+stat_function(fun=function(x) 1/(1+exp(3+-0.2*x)), col = "grey")+
+stat_function(fun=function(x) 1/(1+exp(bb0+bb1*x)), col = "orange")+
+ggtitle("biomass")+
+theme(axis.title = element_blank())
+
+# multiplot
+lay <- rbind(c(1, 1, 3, 5),
+             c(1, 1, 3, 6),
+             c(4, 4, 2, 7))
+grid.arrange(map, lag, trace, converg, disp, tempC, vol, layout_matrix = lay)
