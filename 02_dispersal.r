@@ -83,11 +83,12 @@ bb1 <- -0.08
 
 # for X individuals
 nbInd <- 10
-lambda <- rnorm(nbInd, lambda, sqrt((lambda * 0.5)^2))
-bt0 <- rnorm(nbInd, bt0, sqrt((bt0 * 0.3)^2))
-bt1 <- rnorm(nbInd, bt1, sqrt((bt1 * 0.3)^2))
-bb0 <- rnorm(nbInd, bb0, sqrt((bb0 * 0.3)^2))
-bb1 <- rnorm(nbInd, bb1, sqrt((bb1 * 0.3)^2))
+# first number is a approximate optimum
+lambda <- c(lambda, rnorm(nbInd-1, lambda, sqrt((lambda * 0.5)^2)))
+bt0 <- c(bt0, rnorm(nbInd-1, bt0, sqrt((bt0 * 0.3)^2)))
+bt1 <- c(bt1, rnorm(nbInd-1, bt1, sqrt((bt1 * 0.3)^2)))
+bb0 <- c(bb0, rnorm(nbInd-1, bb0, sqrt((bb0 * 0.3)^2)))
+bb1 <- c(bb1, rnorm(nbInd-1, bb1, sqrt((bb1 * 0.3)^2)))
 
 param <- data.frame(mdd, lambda, bt0, bt1, bb0, bb1)
 param$pt <- NA
