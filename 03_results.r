@@ -71,7 +71,6 @@ distMat <- as.data.frame(as.matrix(dist(x = world[,c("X", "Y")], method = "eucli
 ######################################################
 
 load("~/Dropbox/chalarose/ashchal/paramBackup.rdata")
-
 # set the maximum dispersal distance
 mdd <- 1
 
@@ -214,11 +213,12 @@ results$cumulPercent <- cumsum(results$percent)
 
 lag <- ggplot(data = results, aes(x = lag, y = freq))+
 geom_bar(stat="identity")+
-geom_text(aes(label = paste(round(cumulPercent, 2), "%")), col = "red", vjust=-0.25)+
+geom_text(aes(label = paste(round(cumulPercent, 2), "%")), col = "red", vjust = 1.5, size = 2)+
 theme_bw()
 
 # Convergence plot
 load("~/Dropbox/chalarose/ashchal/paramBackup.rdata")
+
 vecMax <- c()
 for (i in sort(unique(paramBackup$iter))){
   a <- max(paramBackup[paramBackup$iter %in% c(1:i), 'pt'])
@@ -256,7 +256,7 @@ theme(legend.position="bottom", legend.title=element_blank(), legend.margin=marg
 longparam <- melt(paramBackup, id.vars = c("mdd", "pt", "iter"))
 trace <- ggplot(data = longparam, aes(iter, value))+
 xlab("iteration")+
-geom_point(shape = 16, size = 1)+
+# geom_point(shape = 16, size = 1)+
 geom_smooth(col = "orange")+
 facet_wrap(~ variable, ncol = 1, scales = "free", strip.position = "right")+
 theme(axis.title.y = element_blank(), strip.background = element_rect(colour = "white", fill = "white"), legend.title=element_blank(), legend.position = "bottom", panel.spacing = unit(0, "lines"))

@@ -71,24 +71,23 @@ mdd <- 1
 
 # set the lambda parameter of the dispersal function
 # (to be optimised)
-lambda <- 2.5
+lambda <- 0.54
 
 # set the bt0 and bt1 parameters of the temperature function
-bt0 <- -18
-bt1 <- 0.8
+bt0 <- -25.06
+bt1 <- 1.07
 
 # set the bb0 and bb1 parameters of the Volume function
-bb0 <- 3
-bb1 <- -0.2
+bb0 <- 2.11
+bb1 <- -0.08
 
 # for X individuals
 nbInd <- 10
-# (the first number is from a previous GA)
-lambda <- c(0.54, runif(nbInd - 1, 0, 15))
-bt0 <- c(-25.06, -runif(nbInd - 1, 0, 30))
-bt1 <- c(1.07, runif(nbInd - 1, 0, 2))
-bb0 <- c(2.11, runif(nbInd - 1, 0, 15))
-bb1 <- c(-0.08, -runif(nbInd - 1, 0, 1))
+lambda <- rnorm(nbInd, lambda, sqrt((lambda * 0.5)^2))
+bt0 <- rnorm(nbInd, bt0, sqrt((bt0 * 0.3)^2))
+bt1 <- rnorm(nbInd, bt1, sqrt((bt1 * 0.3)^2))
+bb0 <- rnorm(nbInd, bb0, sqrt((bb0 * 0.3)^2))
+bb1 <- rnorm(nbInd, bb1, sqrt((bb1 * 0.3)^2))
 
 param <- data.frame(mdd, lambda, bt0, bt1, bb0, bb1)
 param$pt <- NA
@@ -265,26 +264,12 @@ for (iter in 1:nbIter){  # Number of iterations
   }
 
   # mutation
-  # mutation probability = 0.1 (applies to allels)
+  # mutation probability = 0.2 (applies to allels)
   for (i in colnames(crossed)){
     for (j in 1:nrow(crossed)){
       rdmnb <- runif(1, 0, 1)
-      if (rdmnb < 0.1){
-        if (i == "lambda"){
-          crossed[j, i] <- runif(1, 0, 15)
-        }
-        if (i == "bt0"){
-          crossed[j, i] <- -runif(1, 0, 30)
-        }
-        if (i == "bt1"){
-          crossed[j, i] <- runif(1, 0, 2)
-        }
-        if (i == "bb0"){
-          crossed[j, i] <- runif(1, 0, 15)
-        }
-        if (i == "bb1"){
-          crossed[j, i] <- -runif(1, 0, 1)
-        }
+      if (rdmnb < 0.2){
+        crossed[j, i] <- crossed[j, i] + rnorm(1, 0, sqrt((crossed[j, i] * 0.3)^2))
       }
     }
   }
@@ -306,39 +291,6 @@ for (iter in 1:nbIter){  # Number of iterations
   mutated <- cbind(a, mutated)
   colnames(mutated)[1] <- "mdd"
   param <- mutated
-
-  # # selection
-  # param <- param[order(-param$pt),]
-  # selected <- param[1:2,]
-  #
-  # # crossover
-  # crossed <- param[3:7,]
-  # # create an empty table to recieve randomised values
-  # cross <- as.data.frame(matrix(ncol = ncol(param), nrow = nrow(crossed)))
-  # colnames(cross) <- colnames(param)
-  # # for each parameter we randomly exchange values among individuals
-  # # first create a list of possible random values
-  # rdm <- c(1:nrow(crossed))
-  # for (np in 1:ncol(crossed-1)){  # each column (parameter)
-  #   for (ni in 1:nrow(cross)){  # each line (individual)
-  #     draw <- round(runif(1, 1, length(rdm)), 0)  # random number in rdm
-  #     cross[ni, np] <- crossed[rdm[draw], np]  # write the randmly selected value in the cross table
-  #     rdm <- rdm[-draw]  # delete that value in the remaining choices
-  #   }
-  #   rdm <- c(1:nrow(crossed))
-  # }
-  # crossed <- cross
-  #
-  # # mutation
-  # mutated <- param[8:10,]
-  # # add random value to parameters
-  # for (np in c("lambda", "bt1","bb0", "bt0", "bb1")){
-  #   mutated[, np] <- mutated[, np] + rnorm(3, 0, sqrt((mutated[, np] * 0.9)^2))
-  # }
-  #
-  # # combine new set of parameters
-  # param <- rbind(selected, crossed, mutated)
-  # param$pt <- NA
 
   ######################################################
   # Follow progression
@@ -382,7 +334,6 @@ end_time - start_time
 paramBackup <- paramBackup[-1,]
 paramBackup <- paramBackup[order(-paramBackup$pt),]
 
-
 save(paramBackup, file = '~/Dropbox/chalarose/ashchal/paramBackup.rdata')
 
 # ####################################################
@@ -409,30 +360,3 @@ save(paramBackup, file = '~/Dropbox/chalarose/ashchal/paramBackup.rdata')
 # out1 <- out[order(out$pt), ]
 #
 # # save(out,file='./out.rdata')
-
-
-
-
-
-
-
-#
-# ######################################################
-# # set the dispersal function
-# ######################################################
-# lambda <- 2.5
-# curve(exp(-lambda*x), from = 0, to = 2)
-#
-# ######################################################
-# # set the temperature logistic function
-# ######################################################
-# bt0 <- -18
-# bt1 <- 0.8
-# curve(1/(1+exp(bt0+bt1*x)), from = 0, to = 40)
-#
-# ######################################################
-# # set the volume exponential function
-# ######################################################
-# bb0 <- 3
-# bb1 <- -0.2
-# curve(1/(1+exp(bb0+bb1*x)), from = 0, to = 100)
