@@ -292,3 +292,31 @@ lay <- rbind(c(1, 1, 3, 5),
              c(1, 1, 3, 6),
              c(4, 4, 2, 7))
 grid.arrange(map, lag, trace, converg, disp, tempC, vol, layout_matrix = lay)
+
+
+
+######################################################
+# Exploration synthesis
+######################################################
+par(mfrow=c(2,2))
+# dispersal
+curve(exp(-2.5*x), col = "black", from = 0, to = 2, main = "dispersal function", ylab = "", xlab = "lat - long (degree?)")
+for (i in 1:nrow(paramBackup)){
+  curve(exp(-paramBackup[i, "lambda"]*x), add = TRUE, col = "grey")
+}
+curve(exp(-lambda*x), add = TRUE, col = "red")
+
+# temperature
+curve(1/(1+exp(-18+0.8*x)), col = "black", from = 0, to = 45, main = "temperature limitation function", ylab = "", xlab = "temperature (°C)")
+for (i in 1:nrow(paramBackup)){
+  curve(1/(1+exp(paramBackup[i, "bt0"]+paramBackup[i, "bt1"]*x)), add = TRUE, col = "grey")
+}
+curve(1/(1+exp(bt0+bt1*x)), add = TRUE, col = "red")
+
+# biomass
+curve(1/(1+exp(3+-0.2*x)), col = "black", from = 0, to = 100, main = "biomass limitation function", ylab= "", xlab = "biomass (m3/ha)")
+for (i in 1:nrow(paramBackup)){
+  curve(1/(1+exp(paramBackup[i,"bb0"]+paramBackup[i, "bb1"]*x)), add = TRUE, col = "grey")
+}
+curve(1/(1+exp(bb0+bb1*x)), add = TRUE, col = "red")
+ par(mfrow=c(1,1))
