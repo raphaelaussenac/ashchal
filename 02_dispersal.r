@@ -83,11 +83,11 @@ bb1 <- -0.2
 
 # for X individuals
 nbInd <- 10
-lambda <- rnorm(nbInd,lambda, lambda * 0.9)
-bt0 <- rnorm(nbInd,bt0, bt0 * -0.9)
-bt1 <- rnorm(nbInd,bt1, bt1 * 0.9)
-bb0 <- rnorm(nbInd,bb0, bb0 * 0.9)
-bb1 <- rnorm(nbInd,bb1, bb1 * -0.9)
+lambda <- runif(nbInd, 0, 15)
+bt0 <- -runif(nbInd, 0, 30)
+bt1 <- runif(nbInd, 0, 2)
+bb0 <- runif(nbInd, 0, 15)
+bb1 <- -runif(nbInd, 0, 1)
 
 param <- data.frame(mdd, lambda, bt0, bt1, bb0, bb1)
 param$pt <- NA
@@ -112,7 +112,7 @@ for (iter in 1:nbIter){  # Number of iterations
     # initial state for each individual (individual = model)
     worldInd <- world
     # create an annual loop
-    for (annee in 2008:2008){
+    for (annee in 2008:2017){
       # list of infected cells
       if (annee == 2008){
         worldInd[!is.na(worldInd$annee) & worldInd$annee == 2008, "infected"] <- 1
@@ -265,11 +265,25 @@ for (iter in 1:nbIter){  # Number of iterations
 
   # mutation
   # mutation probability = 0.1 (applies to allels)
-  for (i in 1:ncol(crossed)){
+  for (i in colnames(crossed)){
     for (j in 1:nrow(crossed)){
       rdmnb <- runif(1, 0, 1)
       if (rdmnb < 0.1){
-        crossed[j, i] <- crossed[j, i] + rnorm(1, 0, sqrt((crossed[j, i] * 0.9)^2))
+        if (i == "lambda"){
+          crossed[j, i] <- runif(1, 0, 15)
+        }
+        if (i == "bt0"){
+          crossed[j, i] <- -runif(1, 0, 30)
+        }
+        if (i == "bt1"){
+          crossed[j, i] <- runif(1, 0, 2)
+        }
+        if (i == "bb0"){
+          crossed[j, i] <- runif(1, 0, 15)
+        }
+        if (i == "bb1"){
+          crossed[j, i] <- -runif(1, 0, 1)
+        }
       }
     }
   }
