@@ -67,7 +67,7 @@ distMat <- as.data.frame(as.matrix(dist(x = world[,c("X", "Y")], method = "eucli
 ######################################################
 
 # set the maximum dispersal distance
-mdd <- 1
+mdd <- 2
 
 # set the lambda parameter of the dispersal function
 # (to be optimised)
@@ -83,12 +83,12 @@ bb1 <- -0.08
 
 # for X individuals
 nbInd <- 10
-# first number is a approximate optimum
-lambda <- c(lambda, rnorm(nbInd-1, lambda, sqrt((lambda * 0.5)^2)))
-bt0 <- c(bt0, rnorm(nbInd-1, bt0, sqrt((bt0 * 0.3)^2)))
-bt1 <- c(bt1, rnorm(nbInd-1, bt1, sqrt((bt1 * 0.3)^2)))
-bb0 <- c(bb0, rnorm(nbInd-1, bb0, sqrt((bb0 * 0.3)^2)))
-bb1 <- c(bb1, rnorm(nbInd-1, bb1, sqrt((bb1 * 0.3)^2)))
+# first numbers are approximate optimums
+lambda <- c(lambda, 0.067, rnorm(nbInd-1, lambda, sqrt((lambda * 0.5)^2)))
+bt0 <- c(bt0, -25.06, rnorm(nbInd-2, bt0, sqrt((bt0 * 0.3)^2)))
+bt1 <- c(bt1, 1.070, rnorm(nbInd-2, bt1, sqrt((bt1 * 0.3)^2)))
+bb0 <- c(bb0, 2.7123, rnorm(nbInd-2, bb0, sqrt((bb0 * 0.3)^2)))
+bb1 <- c(bb1, -0.06437, rnorm(nbInd-2, bb1, sqrt((bb1 * 0.3)^2)))
 
 param <- data.frame(mdd, lambda, bt0, bt1, bb0, bb1)
 param$pt <- NA

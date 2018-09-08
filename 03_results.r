@@ -72,7 +72,7 @@ distMat <- as.data.frame(as.matrix(dist(x = world[,c("X", "Y")], method = "eucli
 
 load("~/Dropbox/chalarose/ashchal/paramBackup.rdata")
 # set the maximum dispersal distance
-mdd <- 1
+mdd <- 2
 
 # set the lambda parameter of the dispersal function
 # (to be optimised)
