@@ -71,7 +71,7 @@ mdd <- 2
 
 # set the lambda parameter of the dispersal function
 # (to be optimised)
-lambda <- 0.54
+lambda <- 3
 
 # set the bt0 and bt1 parameters of the temperature function
 bt0 <- -25.06
@@ -84,7 +84,7 @@ bb1 <- -0.08
 # for X individuals
 nbInd <- 10
 # first numbers are approximate optimums
-lambda <- c(lambda, 0.067, rnorm(nbInd-1, lambda, sqrt((lambda * 0.5)^2)))
+lambda <- c(lambda, 0.067, 0.54, rnorm(nbInd-3, lambda, sqrt((lambda * 0.5)^2)))
 bt0 <- c(bt0, -25.06, rnorm(nbInd-2, bt0, sqrt((bt0 * 0.3)^2)))
 bt1 <- c(bt1, 1.070, rnorm(nbInd-2, bt1, sqrt((bt1 * 0.3)^2)))
 bb0 <- c(bb0, 2.7123, rnorm(nbInd-2, bb0, sqrt((bb0 * 0.3)^2)))
