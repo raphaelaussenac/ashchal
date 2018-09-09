@@ -87,7 +87,7 @@ scorInd <- function(lambda = lambda, bt0 = bt0, bt1 = bt1, bb0 = bb0, bb1 = bb1)
   # initial state for each individual (individual = model)
   worldInd <- world
   # create an annual loop
-  for (annee in 2008:2009){
+  for (annee in 2008:2018){
     # list of infected cells
     if (annee == 2008){
       worldInd[!is.na(worldInd$annee) & worldInd$annee == 2008, "infected"] <- 1
@@ -325,4 +325,4 @@ end_time - start_time
 paramBackup <- paramBackup[-1,]
 paramBackup <- paramBackup[order(-paramBackup$pt),]
 
-# save(paramBackup, file = '~/Dropbox/chalarose/ashchal/paramBackup.rdata')
+save(paramBackup, file = '~/Dropbox/chalarose/ashchal/paramBackup.rdata')

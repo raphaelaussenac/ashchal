@@ -7,6 +7,8 @@ rm(list=ls(all=TRUE))
 library(ggplot2)
 library(ggmap)
 library(doParallel)
+library(reshape2)
+library(gridExtra)
 
 ####################################################
 # Parallel
@@ -77,6 +79,7 @@ distMat <- as.data.frame(as.matrix(dist(x = world[,c("X", "Y")], method = "eucli
 ######################################################
 
 load("~/Dropbox/chalarose/ashchal/paramBackup.rdata")
+
 # set the maximum dispersal distance
 mdd <- 2
 
@@ -196,7 +199,6 @@ for (annee in range(worldInd$annee, na.rm = T)[1]:range(worldInd$annee, na.rm = 
             ggtitle(annee))
   Sys.sleep(0.2)
 }
-
 
 # last map
 map <- bckgrd+
