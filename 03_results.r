@@ -253,17 +253,40 @@ theme(legend.position="bottom", legend.title=element_blank(), legend.margin=marg
         legend.box.margin=margin(-10,-10,-10,-10))
 
 # Trace plot
-longparam <- melt(paramBackup, id.vars = c("mdd", "pt", "iter"))
-trace <- ggplot(data = longparam, aes(iter, value))+
+tracedf <- matrix(nrow = max(paramBackup$iter), ncol = 5)
+colnames(tracedf) <- c("lambda", "bt0", "bt1", "bb0", "bb1")
+tracedf <- as.data.frame(tracedf)
+for (j in colnames(tracedf)){
+  vecMax <- c()
+  for (i in sort(unique(paramBackup$iter))){
+    a <- paramBackup[paramBackup$iter %in% c(1:i),]
+    a <- a[1,j]
+    vecMax <- c(vecMax, a)
+  }
+  tracedf[,j] <- vecMax
+}
+tracedf$iter <- as.numeric(rownames(tracedf))
+longparam <- melt(tracedf, id.vars = c("iter"))
+trace <- ggplot(data = longparam, aes(iter, value, group = variable))+
+theme_bw()+
 xlab("iteration")+
 # geom_point(shape = 16, size = 1)+
 geom_smooth(col = "orange")+
 facet_wrap(~ variable, ncol = 1, scales = "free", strip.position = "right")+
 theme(axis.title.y = element_blank(), strip.background = element_rect(colour = "white", fill = "white"), legend.title=element_blank(), legend.position = "bottom", panel.spacing = unit(0, "lines"))
 
+# longparam <- melt(paramBackup[paramBackup], id.vars = c("mdd", "pt", "iter"))
+#  <- ggplot(data = longparam, aes(iter, value))+
+# xlab("iteration")+
+# # geom_point(shape = 16, size = 1)+
+# geom_smooth(col = "orange")+
+# facet_wrap(~ variable, ncol = 1, scales = "free", strip.position = "right")+
+# theme(axis.title.y = element_blank(), strip.background = element_rect(colour = "white", fill = "white"), legend.title=element_blank(), legend.position = "bottom", panel.spacing = unit(0, "lines"))
+
 # set the dispersal function
 # lambda <- 2.5
 disp <- ggplot(data.frame(x=c(0, 2)), aes(x)) +
+theme_bw()+
 stat_function(fun=function(x) exp(-2.5*x), col = "grey")+
 stat_function(fun=function(x) exp(-lambda*x), col = "orange")+
 ggtitle("dispersal")+
@@ -273,6 +296,7 @@ theme(axis.title = element_blank())
 # bt0 <- -18
 # bt1 <- 0.8
 tempC <- ggplot(data.frame(x=c(0, 40)), aes(x)) +
+theme_bw()+
 stat_function(fun=function(x) 1/(1+exp(-18+0.8*x)), col = "grey")+
 stat_function(fun=function(x) 1/(1+exp(bt0+bt1*x)), col = "orange")+
 ggtitle("temperature")+
@@ -282,6 +306,7 @@ theme(axis.title = element_blank())
 # bb0 <- 3
 # bb1 <- -0.2
 vol <- ggplot(data.frame(x=c(0, 100)), aes(x)) +
+theme_bw()+
 stat_function(fun=function(x) 1/(1+exp(3+-0.2*x)), col = "grey")+
 stat_function(fun=function(x) 1/(1+exp(bb0+bb1*x)), col = "orange")+
 ggtitle("biomass")+
@@ -293,30 +318,29 @@ lay <- rbind(c(1, 1, 3, 5),
              c(4, 4, 2, 7))
 grid.arrange(map, lag, trace, converg, disp, tempC, vol, layout_matrix = lay)
 
-
-
 ######################################################
 # Exploration synthesis
 ######################################################
 par(mfrow=c(2,2))
 # dispersal
-curve(exp(-2.5*x), col = "black", from = 0, to = 2, main = "dispersal function", ylab = "", xlab = "lat - long (degree?)")
+curve(exp(-lambda*x), col = "red", from = 0, to = 2, main = "dispersal function", ylab = "", xlab = "lat - long (degree?)", ylim = c(0,1))
 for (i in 1:nrow(paramBackup)){
   curve(exp(-paramBackup[i, "lambda"]*x), add = TRUE, col = "grey")
 }
 curve(exp(-lambda*x), add = TRUE, col = "red")
 
 # temperature
-curve(1/(1+exp(-18+0.8*x)), col = "black", from = 0, to = 45, main = "temperature limitation function", ylab = "", xlab = "temperature (°C)")
+curve(1/(1+exp(bt0+bt1*x)), col = "red", from = 0, to = 45, main = "temperature limitation function", ylab = "", xlab = "temperature (°C)", ylim = c(0,1))
 for (i in 1:nrow(paramBackup)){
   curve(1/(1+exp(paramBackup[i, "bt0"]+paramBackup[i, "bt1"]*x)), add = TRUE, col = "grey")
 }
 curve(1/(1+exp(bt0+bt1*x)), add = TRUE, col = "red")
 
 # biomass
-curve(1/(1+exp(3+-0.2*x)), col = "black", from = 0, to = 100, main = "biomass limitation function", ylab= "", xlab = "biomass (m3/ha)")
+curve(1/(1+exp(bb0+bb1*x)), col = "red", from = 0, to = 500, main = "biomass limitation function", ylab= "", xlab = "biomass (m3/ha)", ylim = c(0,1))
 for (i in 1:nrow(paramBackup)){
   curve(1/(1+exp(paramBackup[i,"bb0"]+paramBackup[i, "bb1"]*x)), add = TRUE, col = "grey")
 }
 curve(1/(1+exp(bb0+bb1*x)), add = TRUE, col = "red")
- par(mfrow=c(1,1))
+
+par(mfrow=c(1,1))
