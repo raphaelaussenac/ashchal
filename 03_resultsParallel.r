@@ -111,7 +111,7 @@ scorInd <- function(lambda = lambda, bt0 = bt0, bt1 = bt1, bb0 = bb0, bb1 = bb1)
   # initial state for each individual (individual = model)
   worldInd <- world
   # create an annual loop
-  for (annee in 2008:2017){
+  for (annee in 2008:2016){
     # list of infected cells
     if (annee == 2008){
       worldInd[!is.na(worldInd$annee) & worldInd$annee == 2008, "infected"] <- 1
@@ -194,9 +194,9 @@ ggtitle("2008")
 p
 
 # maps
-for (annee in range(worldInd$annee, na.rm = T)[1]:range(worldInd$annee, na.rm = T)[2]){
-  print(p + geom_point(data=worldInd[!is.na(worldInd$simulAnnee) & worldInd$simulAnnee <= annee & worldInd$infected == 1, ], aes(X, Y), col = "red", shape = 16, size = 1)+
-            ggtitle(annee))
+for (simulAnnee in range(worldInd$simulAnnee, na.rm = T)[1]:range(worldInd$simulAnnee, na.rm = T)[2]){
+  print(p + geom_point(data=worldInd[!is.na(worldInd$simulAnnee) & worldInd$simulAnnee <= simulAnnee & worldInd$infected == 1, ], aes(X, Y), col = "red", shape = 16, size = 1)+
+            ggtitle(simulAnnee))
   Sys.sleep(0.2)
 }
 
@@ -229,16 +229,18 @@ tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 8, "pt"] <- 2
 tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 9, "pt"] <- 1
 tabOptim[!is.na(tabOptim$diff) & tabOptim$diff > 9, "pt"] <- 0
 # model doesn't infect a cell that has no chalara on the field --> 0
-tabOptim[is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- 10
+tabOptim[is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- +10
 # doesn't infect a cell that has chalara --> 0
 tabOptim[!is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- -10
 # infect a cell that has no chalara on the field --> -10
 tabOptim[is.na(tabOptim$annee) & !is.na(tabOptim$simulAnnee), "pt"] <- -10
 
+# remove 2008
+# tabOptim <- tabOptim[tabOptim$annee > 2008, ]
 results <- as.data.frame(t(table(tabOptim$diff)))
 results <- results[, 2:3]
 colnames(results) <- c("lag", "freq")
-results$percent <- results$freq * 100 / nrow(tabOptim)
+results$percent <- results$freq * 100 / nrow(tabOptim[!is.na(worldInd$annee),])
 results$cumulPercent <- cumsum(results$percent)
 
 lag <- ggplot(data = results, aes(x = lag, y = freq))+

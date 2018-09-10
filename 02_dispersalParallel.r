@@ -87,7 +87,7 @@ scorInd <- function(lambda = lambda, bt0 = bt0, bt1 = bt1, bb0 = bb0, bb1 = bb1)
   # initial state for each individual (individual = model)
   worldInd <- world
   # create an annual loop
-  for (annee in 2008:2018){
+  for (annee in 2008:2016){
     # list of infected cells
     if (annee == 2008){
       worldInd[!is.na(worldInd$annee) & worldInd$annee == 2008, "infected"] <- 1
@@ -158,7 +158,7 @@ scorInd <- function(lambda = lambda, bt0 = bt0, bt1 = bt1, bb0 = bb0, bb1 = bb1)
   tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 9, "pt"] <- 1
   tabOptim[!is.na(tabOptim$diff) & tabOptim$diff > 9, "pt"] <- 0
   # model doesn't infect a cell that has no chalara on the field --> 0
-  tabOptim[is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- 10
+  tabOptim[is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- +10
   # doesn't infect a cell that has chalara --> 0
   tabOptim[!is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- -10
   # infect a cell that has no chalara on the field --> -10
@@ -177,7 +177,7 @@ scorInd <- function(lambda = lambda, bt0 = bt0, bt1 = bt1, bb0 = bb0, bb1 = bb1)
 ######################################################
 
 # number of iteration
-nbIter <- 5
+nbIter <- 50
 
 # progress bar
 pb = txtProgressBar(min = 0, max = nbIter, initial = 0, style = 3)
