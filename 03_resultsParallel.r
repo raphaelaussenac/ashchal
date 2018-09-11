@@ -319,29 +319,32 @@ theme(axis.title.y = element_blank(), strip.background = element_rect(colour = "
 # lambda <- 2.5
 disp <- ggplot(data.frame(x=c(0, 2)), aes(x)) +
 theme_bw()+
-stat_function(fun=function(x) exp(-2.5*x), col = "grey")+
+# stat_function(fun=function(x) exp(-2.5*x), col = "grey")+
 stat_function(fun=function(x) exp(-lambda*x), col = "orange")+
 ggtitle("dispersal")+
+ylim(0,1)+
 theme(axis.title = element_blank())
 
 # set the temperature logistic function
 # bt0 <- -18
 # bt1 <- 0.8
-tempC <- ggplot(data.frame(x=c(0, 40)), aes(x)) +
+tempC <- ggplot(data.frame(x=c(0, 45)), aes(x)) +
 theme_bw()+
-stat_function(fun=function(x) 1/(1+exp(-18+0.8*x)), col = "grey")+
+# stat_function(fun=function(x) 1/(1+exp(-18+0.8*x)), col = "grey")+
 stat_function(fun=function(x) 1/(1+exp(bt0+bt1*x)), col = "orange")+
 ggtitle("temperature")+
+ylim(0,1)+
 theme(axis.title = element_blank())
 
 # set the volume exponential function
 # bb0 <- 3
 # bb1 <- -0.2
-vol <- ggplot(data.frame(x=c(0, 100)), aes(x)) +
+vol <- ggplot(data.frame(x=c(0, 500)), aes(x)) +
 theme_bw()+
-stat_function(fun=function(x) 1/(1+exp(3+-0.2*x)), col = "grey")+
+# stat_function(fun=function(x) 1/(1+exp(3+-0.2*x)), col = "grey")+
 stat_function(fun=function(x) 1/(1+exp(bb0+bb1*x)), col = "orange")+
 ggtitle("biomass")+
+ylim(0,1)+
 theme(axis.title = element_blank())
 
 # multiplot
