@@ -51,15 +51,15 @@ mdd <- 2
 
 # set the lambda parameter of the dispersal function
 # (to be optimised)
-lambda <- 3.99
+lambda <- 3.47
 
 # set the bt0 and bt1 parameters of the temperature function
-bt0 <- -62.45
-bt1 <- 2.44
+bt0 <- -69.08
+bt1 <- 2.87
 
 # set the bb0 and bb1 parameters of the Volume function
-bb0 <- 0.43
-bb1 <- -0.018
+bb0 <- 0.10
+bb1 <- -0.02
 
 # for X individuals
 nbInd <- 10
@@ -158,7 +158,7 @@ scorInd <- function(lambda = lambda, bt0 = bt0, bt1 = bt1, bb0 = bb0, bb1 = bb1)
   tabOptim[!is.na(tabOptim$diff) & tabOptim$diff == 9, "pt"] <- 1
   tabOptim[!is.na(tabOptim$diff) & tabOptim$diff > 9, "pt"] <- 0
   # model doesn't infect a cell that has no chalara on the field --> 0
-  tabOptim[is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- +10
+  tabOptim[is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- 0
   # doesn't infect a cell that has chalara --> 0
   tabOptim[!is.na(tabOptim$annee) & is.na(tabOptim$simulAnnee), "pt"] <- -10
   # infect a cell that has no chalara on the field --> -10
@@ -177,7 +177,7 @@ scorInd <- function(lambda = lambda, bt0 = bt0, bt1 = bt1, bb0 = bb0, bb1 = bb1)
 ######################################################
 
 # number of iteration
-nbIter <- 50
+nbIter <- 100
 
 # progress bar
 pb = txtProgressBar(min = 0, max = nbIter, initial = 0, style = 3)
